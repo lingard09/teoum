@@ -1,0 +1,185 @@
+.card {
+  position: relative;
+  overflow: hidden;
+  padding: 32px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+/* 체험 카드: 하단에 티켓 절취선 영역(17px)만큼 여백이 더 있음 */
+.gridCard {
+  padding-bottom: 41px;
+}
+
+.corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 128px;
+  height: 128px;
+  border-bottom-left-radius: 12px;
+  background: rgba(196, 231, 219, 0.3);
+}
+
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.gridCard .header {
+  margin-bottom: 24px;
+}
+
+.number {
+  color: var(--color-ink-sub);
+  font-family: var(--font-latin);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+  white-space: nowrap;
+}
+
+.body {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.thumb {
+  flex-shrink: 0;
+  width: 176px;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--color-surface-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.location {
+  margin: 0;
+  color: var(--color-green);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+}
+
+.title {
+  margin: 2px 0 0;
+  color: var(--color-ink);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 36px;
+  letter-spacing: -0.26px;
+}
+
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+}
+
+.detailsGrid,
+.detailsList {
+  width: 500px;
+  max-width: 100%;
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 16px;
+  padding: 12px;
+  border-radius: 4px;
+  background: var(--color-surface);
+}
+
+.detailsList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--color-surface-2);
+}
+
+.detail {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.detail dt {
+  font-weight: 700;
+}
+
+.detail dd {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+.detailsGrid .detail {
+  gap: 4px;
+}
+
+.detailsGrid dt {
+  color: var(--color-ink);
+}
+
+.detailsGrid dd,
+.detailsList dt {
+  color: var(--color-ink-sub);
+}
+
+.detailsList dd {
+  color: var(--color-ink);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 720px) {
+  .body {
+    flex-direction: column;
+  }
+
+  .thumb {
+    width: 100%;
+    height: 200px;
+  }
+
+  .detail {
+    white-space: normal;
+  }
+}

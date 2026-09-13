@@ -1,0 +1,52 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: 0.28px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.button:hover {
+  filter: brightness(0.95);
+}
+
+.lg {
+  padding: 10px 15px;
+}
+
+.light {
+  background: var(--color-surface-3);
+  color: var(--color-ink);
+}
+
+.cream {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.dark {
+  background: var(--color-ink);
+  color: #fff;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.dark:hover,
+.green:hover {
+  filter: brightness(1.15);
+}
+
+.green {
+  background: var(--color-green);
+  color: #fff;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}

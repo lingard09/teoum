@@ -1,0 +1,59 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px 24px;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 20px;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 48px;
+  letter-spacing: -0.54px;
+}
+
+.description {
+  margin: 0;
+  color: var(--color-ink-sub);
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 5px 0;
+}
+
+.toolbar > button {
+  gap: 6px;
+}
+
+.toolbar > .latin {
+  font-family: var(--font-latin);
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .toolbar {
+    gap: 8px;
+  }
+}

@@ -1,0 +1,128 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 32px;
+  border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.blobMint,
+.blobPeach {
+  position: absolute;
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.blobMint {
+  top: -64px;
+  right: -64px;
+  width: 320px;
+  height: 320px;
+  background: rgba(196, 231, 219, 0.2);
+  filter: blur(32px);
+}
+
+.blobPeach {
+  bottom: -80px;
+  left: 40.95%;
+  right: 33.33%;
+  height: 288px;
+  background: rgba(255, 219, 199, 0.2);
+  filter: blur(20px);
+}
+
+.identity {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 123px;
+  height: 122px;
+}
+
+/* 원본 이미지(1376×768)에서 캐릭터 부분만 잘라 보여주는 피그마 크롭 값 */
+.avatarCrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.avatarCrop img {
+  position: absolute;
+  top: -77.59%;
+  left: -15.45%;
+  width: 465.04%;
+  max-width: none;
+  height: 261.69%;
+}
+
+.badge {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  background: var(--color-ink);
+  box-shadow: var(--shadow-md);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.levelTag {
+  font-family: var(--font-latin);
+  font-weight: 600;
+  letter-spacing: 0.55px;
+}
+
+.nameRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  padding-top: 4px;
+}
+
+.name {
+  color: var(--color-ink);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 48px;
+  letter-spacing: -0.54px;
+}
+
+.journey {
+  color: var(--color-ink-sub);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.summary {
+  margin: 0;
+  padding-top: 2px;
+  color: var(--color-ink-sub);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 24px;
+}
