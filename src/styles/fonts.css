@@ -1,0 +1,22 @@
+/* 가평한석봉체 (Gapyeong Hanseokbong) — 가평군 배포 공공누리 무료 폰트, 로컬 번들 */
+@font-face {
+  font-family: "Gapyeong Hanseokbong";
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/GapyeongHanseokbong-Light.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Gapyeong Hanseokbong";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/GapyeongHanseokbong-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Gapyeong Hanseokbong";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/GapyeongHanseokbong-Bold.woff2") format("woff2");
+}

@@ -1,0 +1,104 @@
+/*
+ * 이 파일의 모든 규칙은 .hanok-app(다시,터움 홈/지도탐색 레이아웃) 하위로만
+ * 적용되도록 스코프를 건다. body/h1-h4/a/button/img/ul 같은 전역 태그 선택자를
+ * 스코프 없이 선언하면 /mypage(팀원 구현, CSS Modules 기반) 쪽 스타일까지
+ * 깨뜨릴 수 있기 때문에 반드시 .hanok-app 하위로만 한정한다.
+ */
+
+.hanok-app {
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+}
+
+.hanok-app * {
+  box-sizing: border-box;
+}
+
+.hanok-app h1,
+.hanok-app h2,
+.hanok-app h3,
+.hanok-app h4 {
+  font-family: var(--font-heading);
+  margin: 0;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.hanok-app p {
+  margin: 0;
+}
+
+.hanok-app a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.hanok-app button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.hanok-app img {
+  display: block;
+  max-width: 100%;
+}
+
+.hanok-app ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hanok-app .container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.hanok-app .section {
+  padding: var(--space-8) 0;
+}
+
+.hanok-app .section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.hanok-app .section-head__title {
+  font-size: var(--fs-h2);
+  color: var(--color-text-primary);
+}
+
+.hanok-app .section-head__desc {
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+}
+
+.hanok-app .section-head__links {
+  display: flex;
+  gap: var(--space-4);
+  font-size: var(--fs-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.hanok-app .section-head__links a:hover {
+  color: var(--color-accent);
+}
+
+@media (max-width: 960px) {
+  .hanok-app .container {
+    padding: 0 var(--space-4);
+  }
+  .hanok-app .section {
+    padding: var(--space-6) 0;
+  }
+}
