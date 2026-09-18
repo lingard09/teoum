@@ -52,17 +52,16 @@
 - 이미지/아이콘은 피그마에서 받아 `src/assets/`에 커밋함 (MCP 에셋 URL은 7일 뒤 만료).
 
 ## 배포
-- **Cloudflare Pages로 이전 중.** 빌드 경로(`vite.config.js`의 `base`)는 `VITE_BASE`
-  환경변수로 정한다 — 기본값 `/`(Cloudflare는 루트 서빙), GitHub Pages 워크플로만
-  `VITE_BASE=/teoum/`를 넘긴다. 라우터는 `import.meta.env.BASE_URL`을 따라가므로 코드 수정 불필요.
-- SPA 딥링크는 `public/_redirects`의 `/* /index.html 200`이 처리한다(Cloudflare).
-  GitHub Pages 쪽은 워크플로가 `404.html`을 복사해서 같은 일을 한다.
-- Cloudflare 대시보드 빌드 설정: Build command `npm run build`, Output directory `dist`.
-  환경변수(`VITE_TOUR_API_KEY`, `VITE_NAVER_MAP_CLIENT_ID`)는 Cloudflare 쪽에 등록한다
-  — GitHub Secrets는 GitHub Pages 배포에만 쓰인다.
+- **Cloudflare Pages** — https://teoum.pages.dev (저장소 연결, main 푸시 시 자동 빌드)
+  - 빌드 설정: Build command `npm run build`, Output directory `dist`
+  - 환경변수(`VITE_TOUR_API_KEY`, `VITE_NAVER_MAP_CLIENT_ID`)는 Cloudflare 프로젝트
+    Settings > Environment variables에 등록돼 있다. GitHub Secrets는 쓰지 않는다.
+  - SPA 딥링크는 `public/_redirects`의 `/* /index.html 200`이 처리한다.
+  - 브랜치를 푸시하면 미리보기 URL이 자동 생성된다. 단 임의 서브도메인이라
+    네이버 지도 Web 서비스 URL 화이트리스트에 안 걸려 미리보기에선 지도가 안 뜰 수 있다.
 - **도메인이 바뀌면 네이버 지도가 인증 실패한다.** NCP 콘솔 > Maps 애플리케이션의
-  "Web 서비스 URL"에 새 배포 주소를 추가해야 지도가 뜬다. Firestore는 도메인 제한이 없다.
-- Cloudflare 전환이 확인되면 `.github/workflows/deploy.yml`을 지워도 된다.
+  "Web 서비스 URL"에 배포 주소를 등록해야 지도가 뜬다. Firestore는 도메인 제한이 없다.
+- GitHub Pages 배포는 Cloudflare로 이전하면서 제거했다(2026-09-19).
 
 ## Firebase (마이페이지 데이터)
 - 프로젝트: `teoum-hanok` (콘솔: https://console.firebase.google.com/project/teoum-hanok)
