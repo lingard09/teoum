@@ -168,3 +168,28 @@
   font-family: var(--font-latin);
   font-size: 13px;
 }
+
+/* TourAPI 체험 카드 전용. 요금·평점 대신 프로그램/휴무/문의처가 들어간다. */
+.programs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding-left: 16px;
+  color: var(--color-ink-sub);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.apiNote {
+  color: var(--color-ink-sub);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.apiTel {
+  color: var(--color-ink);
+  font-family: var(--font-latin);
+  font-size: 14px;
+  font-weight: 600;
+}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from '../../components/Header/Header.jsx'
 import Footer from '../../components/Footer/Footer.jsx'
 import Icon from '../../components/Icon/Icon.jsx'
@@ -15,12 +15,28 @@ import {
   experiences,
   trustItems,
 } from '../../data/experiences.js'
+import { fetchExperiences } from '../../api/experienceApi.js'
+import ApiExperienceCard from './ApiExperienceCard.jsx'
 import ExperienceCard from './ExperienceCard.jsx'
 import styles from './ExperiencesPage.module.css'
 
 function ExperiencesPage() {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('all')
+
+  // TourAPI 관광지/문화시설에서 실제 체험 시설을 받아온다.
+  // 키가 없거나 실패하면 비어서 큐레이션 목업만 보인다.
+  const [apiExperiences, setApiExperiences] = useState([])
+
+  useEffect(() => {
+    let alive = true
+    fetchExperiences().then(({ experiences: list }) => {
+      if (alive) setApiExperiences(list)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
   const [activeRegion, setActiveRegion] = useState('전국')
   const [activeDifficulty, setActiveDifficulty] = useState(() => new Set(['instant']))
   const [sortId, setSortId] = useState('recommended')
@@ -150,6 +166,10 @@ function ExperiencesPage() {
             <div className={styles.grid}>
               {experiences.map((experience) => (
                 <ExperienceCard key={experience.id} experience={experience} />
+              ))}
+
+              {apiExperiences.map((experience) => (
+                <ApiExperienceCard key={experience.id} experience={experience} />
               ))}
             </div>
 

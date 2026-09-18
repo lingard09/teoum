@@ -16,6 +16,10 @@ import { callKorService, hasTourApiKey } from "./tourApiClient.js";
 const STAY_CONTENT_TYPE = "32";
 const KEYWORDS = ["한옥", "고택"];
 
+// 카드마다 상세를 부르기 때문에 목록이 길수록 호출 수가 배로 늘어난다.
+// 공공데이터포털 일일 트래픽을 감안해 노출 개수를 제한한다.
+const API_ITEM_LIMIT = 12;
+
 function stripHtml(text) {
   return (text ?? "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 }
@@ -85,7 +89,7 @@ export async function fetchStays({ numOfRows = 24 } = {}) {
       }
     }
 
-    return { source: "tourapi", stays: [...byId.values()] };
+    return { source: "tourapi", stays: [...byId.values()].slice(0, API_ITEM_LIMIT) };
   } catch (err) {
     console.warn("[stayApi] 숙박 목록 조회 실패, 큐레이션 목업으로 대체합니다.", err);
     return { source: "fallback", stays: [] };
@@ -121,7 +125,7 @@ export async function fetchStayDetail(contentId) {
       checkIn: intro.checkintime || null,
       checkOut: intro.checkouttime || null,
       parking: intro.parkinglodging || null,
-      tel: intro.infocenterlodging || null,
+      tel: stripHtml(intro.infocenterlodging) || null,
       amenities: amenitiesFrom(intro),
     };
     detailCache.set(contentId, detail);
