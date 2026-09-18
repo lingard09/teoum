@@ -33,3 +33,6 @@ dist-ssr
 
 # Figma 원본 export 폴더 (이미 src/assets/images로 정리해서 옮김, 커밋 불필요)
 photo/
+
+# Firebase CLI 배포 캐시
+.firebase/

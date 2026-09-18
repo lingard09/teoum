@@ -71,3 +71,23 @@
     padding: 24px;
   }
 }
+
+.loading {
+  margin: 0;
+  padding: 80px 0;
+  color: var(--color-ink-sub);
+  font-size: 16px;
+  text-align: center;
+}
+
+/* Firestore 연결이 안 됐을 때만 뜨는 안내. 시안에는 없는 개발용 상태 표시다. */
+.notice {
+  margin: -48px 0 0;
+  padding: 12px 16px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: var(--color-surface-2);
+  color: var(--color-ink-sub);
+  font-size: 14px;
+  line-height: 20px;
+}

@@ -1,17 +1,19 @@
+import { useOutletContext } from 'react-router-dom'
 import Button from '../../components/Button/Button.jsx'
 import Icon from '../../components/Icon/Icon.jsx'
 import { icons } from '../../assets/icons/index.js'
-import { savedCourse } from '../../data/mypage.js'
 import DayTimeline from './DayTimeline.jsx'
 import styles from './CoursesTab.module.css'
 
 function CoursesTab() {
+  const { course } = useOutletContext()
+
   return (
     <section className={styles.section} aria-label="저장된 AI 여행 코스">
       <div className={styles.heading}>
         <div className={styles.titleBlock}>
-          <h2 className={styles.title}>{savedCourse.title}</h2>
-          <p className={styles.description}>{savedCourse.description}</p>
+          <h2 className={styles.title}>{course.title}</h2>
+          <p className={styles.description}>{course.description}</p>
         </div>
 
         <div className={styles.toolbar}>
@@ -30,7 +32,7 @@ function CoursesTab() {
         </div>
       </div>
 
-      {savedCourse.days.map((day) => (
+      {course.days.map((day) => (
         <DayTimeline key={day.label} day={day} />
       ))}
     </section>
