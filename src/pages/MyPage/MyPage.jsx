@@ -1,6 +1,8 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { profile, reservations, scraps } from '../../data/mypage.js'
 import { cx } from '../../utils/cx.js'
+import Header from '../../components/Header/Header.jsx'
+import Footer from '../../components/Footer/Footer.jsx'
 import ProfileHero from './ProfileHero.jsx'
 import styles from './MyPage.module.css'
 
@@ -12,26 +14,30 @@ const TABS = [
 
 function MyPage() {
   return (
-    <main className={styles.page}>
-      <div className={styles.container}>
-        <ProfileHero profile={profile} />
+    <>
+      <Header />
+      <main className={styles.page}>
+        <div className={styles.container}>
+          <ProfileHero profile={profile} />
 
-        <nav className={styles.tabs} aria-label="나의 여정 보관함">
-          {TABS.map((tab) => (
-            <NavLink
-              key={tab.to}
-              to={tab.to}
-              className={({ isActive }) => cx(styles.tab, isActive && styles.active)}
-            >
-              {tab.label}
-              {tab.count != null && <span className={styles.count}>{tab.count}</span>}
-            </NavLink>
-          ))}
-        </nav>
+          <nav className={styles.tabs} aria-label="나의 여정 보관함">
+            {TABS.map((tab) => (
+              <NavLink
+                key={tab.to}
+                to={tab.to}
+                className={({ isActive }) => cx(styles.tab, isActive && styles.active)}
+              >
+                {tab.label}
+                {tab.count != null && <span className={styles.count}>{tab.count}</span>}
+              </NavLink>
+            ))}
+          </nav>
 
-        <Outlet />
-      </div>
-    </main>
+          <Outlet />
+        </div>
+      </main>
+      <Footer />
+    </>
   )
 }
 

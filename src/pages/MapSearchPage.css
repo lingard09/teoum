@@ -1,0 +1,20 @@
+.map-search-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--header-height));
+}
+
+.map-search-page__body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+@media (max-width: 860px) {
+  .map-search-page {
+    height: auto;
+  }
+  .map-search-page__body {
+    flex-direction: column;
+  }
+}

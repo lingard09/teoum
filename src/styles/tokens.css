@@ -1,0 +1,90 @@
+/*
+ * .hanok-app 하위에서만 유효한 디자인 토큰.
+ * :root에 걸지 않는 이유: --color-bg / --color-surface 등 변수명이
+ * src/index.css(팀 공통, /mypage에서 사용)와 겹쳐서, 전역에 걸면
+ * 마이페이지 색상까지 덮어써 버리기 때문. .hanok-app 스코프로 한정하면
+ * 이름이 같아도 서로 다른 서브트리에서만 유효해 충돌하지 않는다.
+ */
+.hanok-app {
+  /* Colors — surfaces */
+  --color-bg: #fefbf6;
+  --color-bg-cream: #f7eee0;
+  --color-bg-cream-soft: #faf3e6;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f4ede2;
+  --color-header-bg: #e8e3da;
+
+  /* Colors — text */
+  --color-text-primary: #2b2118;
+  --color-text-secondary: #6f6255;
+  --color-text-muted: #a49a8c;
+  --color-text-on-dark: #fdf8f0;
+
+  /* Colors — accents */
+  --color-accent: #2c2013;
+  --color-accent-hover: #423022;
+  --color-accent-soft: #efe4d3;
+  --color-highlight: #d97a4d;
+  --color-highlight-soft: #fbe8db;
+
+  /* Colors — border/divider */
+  --color-border: #e9dfcd;
+  --color-border-strong: #d8cbb2;
+
+  /* Colors — status */
+  --color-success-bg: #e7f1e2;
+  --color-success-text: #4c7a3d;
+  --color-warning-bg: #fdf1dc;
+  --color-warning-text: #b8802e;
+  --color-danger-bg: #fbe4de;
+  --color-danger-text: #c1503b;
+
+  /* Colors — overlay */
+  --color-overlay-dark: rgba(30, 22, 14, 0.55);
+  --color-overlay-soft: rgba(30, 22, 14, 0.28);
+
+  /* Typography */
+  --font-heading: "Gapyeong Hanseokbong", "Noto Serif KR", serif;
+  --font-body: "Noto Sans KR", sans-serif;
+
+  --fs-display: 2.5rem;
+  --fs-h1: 2rem;
+  --fs-h2: 1.5rem;
+  --fs-h3: 1.25rem;
+  --fs-body-lg: 1.0625rem;
+  --fs-body: 0.9375rem;
+  --fs-small: 0.8125rem;
+  --fs-tiny: 0.6875rem;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  /* Shadow */
+  --shadow-card: 0 4px 20px rgba(43, 33, 24, 0.08);
+  --shadow-card-hover: 0 10px 28px rgba(43, 33, 24, 0.14);
+  --shadow-popup: 0 16px 40px rgba(43, 33, 24, 0.22);
+  --shadow-header: 0 1px 0 rgba(43, 33, 24, 0.06);
+
+  /* Layout */
+  --container-width: 1200px;
+  --header-height: 104px;
+
+  /* Motion */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s ease;
+}

@@ -1,0 +1,55 @@
+.congestion-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.congestion-bar__caption {
+  font-size: var(--fs-tiny);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.congestion-bar__track {
+  flex: 1;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+  overflow: hidden;
+}
+
+.congestion-bar__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+}
+
+.congestion-bar__fill--low {
+  background: var(--color-success-text);
+}
+
+.congestion-bar__fill--medium {
+  background: var(--color-warning-text);
+}
+
+.congestion-bar__fill--high {
+  background: var(--color-danger-text);
+}
+
+.congestion-bar__level {
+  font-size: var(--fs-tiny);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.congestion-bar__level--low {
+  color: var(--color-success-text);
+}
+
+.congestion-bar__level--medium {
+  color: var(--color-warning-text);
+}
+
+.congestion-bar__level--high {
+  color: var(--color-danger-text);
+}

@@ -1,0 +1,30 @@
+.hero {
+  background: linear-gradient(180deg, var(--color-bg-cream) 0%, var(--color-bg-cream-soft) 100%);
+  padding: var(--space-9) 0 var(--space-8);
+  text-align: center;
+}
+
+.hero__inner {
+  max-width: 760px;
+}
+
+.hero__title {
+  font-size: var(--fs-display);
+  color: var(--color-text-primary);
+}
+
+.hero__subtitle {
+  margin-top: var(--space-4);
+  font-size: var(--fs-body-lg);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .hero {
+    padding: var(--space-7) 0 var(--space-6);
+  }
+  .hero__title {
+    font-size: 1.75rem;
+  }
+}

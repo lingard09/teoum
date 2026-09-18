@@ -7,11 +7,11 @@ import { cx } from '../../utils/cx.js'
 import styles from './Header.module.css'
 
 const NAV_LINKS = [
-  { label: '모아보기' },
+  { label: '모아보기', to: '/' },
   { label: '체험하기', to: '/experiences' },
-  { label: '계획하기', to: '/stays' },
-  { label: '머무르기', to: '/mypage' },
-  { label: '둘러보기' },
+  { label: '계획하기', to: '/mypage' },
+  { label: '머무르기', to: '/stays' },
+  { label: '둘러보기', to: '/map' },
 ]
 
 function Header() {
@@ -19,7 +19,7 @@ function Header() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <div className={styles.left}>
-          <NavLink to="/experiences" className={styles.brand}>
+          <NavLink to="/" className={styles.brand}>
             <span className={styles.brandMark}>
               <img src={logoMark} alt="" className={styles.brandMarkImage} />
             </span>
@@ -35,6 +35,7 @@ function Header() {
                 <NavLink
                   key={link.label}
                   to={link.to}
+                  end={link.to === '/'}
                   className={({ isActive }) => cx(styles.navLink, isActive && styles.navLinkActive)}
                 >
                   {link.label}
