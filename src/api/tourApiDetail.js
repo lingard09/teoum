@@ -1,18 +1,17 @@
 // 한국관광공사 TourAPI(국문 관광정보 서비스, KorService2) 연동 유틸.
 //
-// 서비스키는 .env.local의 VITE_TOURAPI_SERVICE_KEY로만 관리한다. .env.local은
-// .gitignore에 등록돼 있어 커밋되지 않는다 — 새 환경에서는 .env.example을 복사해
+// 서비스키는 .env의 VITE_TOUR_API_KEY 하나로 관리한다(tourApiClient.js와 공유).
+// data.go.kr에서 받은 "Decoding(일반 인증키)" 값을 넣는다 — 아래 buildUrl에서
+// URLSearchParams가 인코딩을 한 번만 수행하므로, 이미 인코딩된 "Encoding" 키를 넣으면
+// %2F -> %252F 처럼 이중 인코딩되어 인증 오류가 난다.
+//
+// .env는 .gitignore에 등록돼 있어 커밋되지 않는다 — 새 환경에서는 .env.example을 복사해
 // 키를 채워 넣을 것. 단, 이 프로젝트는 순수 정적 프런트엔드(Vite SPA)라 빌드된 JS에
 // 키 값이 그대로 포함된다. 즉 배포 후에는 누구나 네트워크 탭/번들에서 키를 볼 수 있다.
 // 완전히 감추려면 백엔드(서버리스 함수 등) 뒤로 프록시해야 하며, 이 저장소에는
 // 아직 그런 백엔드가 없다.
-const SERVICE_KEY = import.meta.env.VITE_TOURAPI_SERVICE_KEY ?? ''
+const SERVICE_KEY = import.meta.env.VITE_TOUR_API_KEY ?? ''
 
-// data.go.kr에서 발급하는 "Encoding" 형태의 키는 이미 URL 인코딩되어 있다(%2B 등).
-// URLSearchParams나 encodeURIComponent로 한 번 더 인코딩하면 %가 %25로 이중 인코딩되어
-// 인증에 실패한다(흔한 SERVICE_KEY 오류 원인) — 그래서 serviceKey만 문자열에 직접 붙이고,
-// 나머지 파라미터만 URLSearchParams로 인코딩한다.
-//
 // apis.data.go.kr은 Access-Control-Allow-Origin을 내려줘서(실제 호출로 확인) 배포본에서도
 // 브라우저 직접 호출이 CORS에 막히지 않는다. 개발 서버에서 프록시를 쓰는 건 CORS 우회가
 // 아니라 순수 편의(vite dev 화면과 같은 오리진으로 보여서 네트워크 탭 확인이 편함) 목적이다.
@@ -24,17 +23,18 @@ const REQUEST_TIMEOUT_MS = 8000
 
 function buildUrl(operation, params) {
   const query = new URLSearchParams({
+    serviceKey: SERVICE_KEY,
     MobileOS: 'ETC',
     MobileApp: 'teoum',
     _type: 'json',
     ...params,
   })
-  return `${BASE_URL}/${operation}?serviceKey=${SERVICE_KEY}&${query.toString()}`
+  return `${BASE_URL}/${operation}?${query.toString()}`
 }
 
 async function callTourApi(operation, params) {
   if (!SERVICE_KEY) {
-    throw new Error('TourAPI 서비스키가 설정되지 않았습니다. .env.local의 VITE_TOURAPI_SERVICE_KEY를 확인하세요.')
+    throw new Error('TourAPI 서비스키가 설정되지 않았습니다. .env의 VITE_TOUR_API_KEY를 확인하세요.')
   }
 
   const controller = new AbortController()

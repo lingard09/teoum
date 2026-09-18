@@ -23,6 +23,11 @@ function Footer() {
           <Icon {...icons.checkCircle} />
           <span>한국관광공사 TourAPI 공공데이터 연계 공식 서비스</span>
         </div>
+
+        <div className={styles.bottom}>
+          <span>© 2026 다시, 터움 (TEOUM). All rights reserved.</span>
+          <span>본 서비스의 관광정보는 한국관광공사 TourAPI 데이터를 기반으로 합니다.</span>
+        </div>
       </div>
     </footer>
   )

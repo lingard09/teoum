@@ -25,11 +25,12 @@
   - get_design_context가 우측 결제 패널 직전에서 잘려서, 결제수단/CTA/환불규정 영역은 해당 노드(1:2152)만 따로 다시 불러와 받음.
 - **구현 완료: TourAPI(한국관광공사 국문 관광정보 서비스, KorService2) 연동** — `src/api/tourapi.js`
   - BookingPage 진입 시 키워드 "북촌한옥마을"로 `searchKeyword2` → `detailCommon2` 순서로 호출해서 체험 요약 카드의 사진/주소/소개글을 실제 데이터로 덮어씀. 로딩 중엔 mock이 먼저 보이고 카드 위에 "실시간 관광정보 불러오는 중…" 표시, 성공하면 "TourAPI 실시간 연동", 실패(키 없음/네트워크 오류/타임아웃 8초)하면 "TourAPI 연동 실패 · 예시 정보 표시 중"으로 바뀌며 원래 mock 문구를 그대로 유지함 — 실제로 성공 호출까지 curl로 확인함(contentid 126537, resultCode 0000).
-  - 서비스키는 `.env.local`의 `VITE_TOURAPI_SERVICE_KEY`에만 있고 `.gitignore`로 커밋 제외됨. `.env.example`에 변수명만 남겨둠.
+  - 서비스키는 `.env`의 `VITE_TOUR_API_KEY` 하나로 통일했다(지도탐색·예약 상세조회가 공유).
+    `.gitignore`로 커밋 제외됨. `.env.example`에 변수명만 남겨둠.
   - **중요(보안) 주의**: 이 프로젝트는 백엔드가 없는 순수 정적 SPA라서, 빌드된 JS 안에 서비스키가 그대로 들어감 — 배포 후에는 누구나 네트워크 탭/번들에서 키를 볼 수 있음. `.env.local`은 "git에 안 올라간다"는 뜻일 뿐 "브라우저에 안 보인다"는 뜻이 아님. 완전히 감추려면 서버리스 함수 등으로 프록시해야 하는데 이 저장소엔 아직 없음 — 프로토타입이라 일단 이 방식으로 진행함, 실서비스 전환 시 재검토 필요.
   - data.go.kr이 주는 "Encoding" 형태 키(%2B 등 이미 URL 인코딩됨)를 URLSearchParams로 또 인코딩하면 인증이 깨져서, serviceKey만 별도로 문자열에 직접 붙임. detailCommon2는 contentTypeId나 ...YN 옵션을 같이 보내면 `INVALID_REQUEST_PARAMETER_ERROR`가 나서(실제로 겪음) contentId만 보냄.
   - `apis.data.go.kr`은 CORS 헤더를 내려줘서(curl로 Origin 헤더 넣어 직접 확인함) 배포본에서도 브라우저 직접 호출이 막히지 않음. 개발 서버의 `/tourapi-proxy`(`vite.config.js`)는 CORS 우회용이 아니라 순수 개발 편의.
-  - **배포 시 할 일**: GitHub Actions로 GH Pages에 배포하려면 저장소 Settings → Secrets and variables → Actions에 `VITE_TOURAPI_SERVICE_KEY`를 등록해야 함(`deploy.yml`에 참조는 넣어뒀지만 실제 값은 사용자가 직접 등록해야 함 — API 키라서 내가 대신 등록하지 않음). 등록 안 하면 배포본은 항상 fallback(mock)만 보임.
+  - **배포 시 할 일**: GitHub Actions로 GH Pages에 배포하려면 저장소 Settings → Secrets and variables → Actions에 `VITE_TOUR_API_KEY`를 등록해야 함(`deploy.yml`에 참조는 넣어뒀지만 실제 값은 사용자가 직접 등록해야 함 — API 키라서 내가 대신 등록하지 않음). 등록 안 하면 배포본은 항상 fallback(mock)만 보임.
   - 이미지 URL이 http로 오는 경우가 있어(같은 호스트가 https도 지원하는 걸 확인) `toHttpsUrl`로 강제 치환함 — 안 하면 https 배포본에서 혼합 콘텐츠로 이미지가 차단됨.
 - **구현 완료: 공통 Header/Footer** ← 100:157 / 100:193 — `src/components/Header/`, `src/components/Footer/`
   - ExperiencesPage, StaysPage, BookingPage에 배치함. MyPage에는 아직 안 붙임 — 필요하면 App.jsx에 공통 레이아웃으로 빼는 걸 고려할 것.

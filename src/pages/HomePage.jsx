@@ -4,7 +4,7 @@ import Hero from "../components/home/Hero.jsx";
 import TourismCard from "../components/common/TourismCard.jsx";
 import StoryCard from "../components/common/StoryCard.jsx";
 import ExperienceCard from "../components/common/ExperienceCard.jsx";
-import Footer from "../components/common/Footer.jsx";
+import Footer from "../components/Footer/Footer.jsx";
 import { fetchFeaturedVillages } from "../api/villageApi.js";
 import { stories } from "../data/stories.js";
 import { homeExperiences } from "../data/homeExperiences.js";
