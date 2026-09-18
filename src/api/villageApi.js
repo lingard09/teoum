@@ -2,6 +2,7 @@ import { villages, featuredVillages } from "../data/villages.js";
 import { regionGroupOf, shortRegionLabelFromAddress } from "../utils/region.js";
 import { hasTourApiKey } from "./tourApiClient.js";
 import {
+  fetchRelatedAttractionsByKeyword,
   searchAttractionsByKeyword,
   fetchAttractionDetail,
   fetchLatestVisitorCountsByRegion,
@@ -235,4 +236,60 @@ export async function fetchVillageById(id) {
     console.warn(`[villageApi] "${base.name}" 상세정보 조회 실패`, err);
     return enriched;
   }
+}
+
+// ------------------------------------------------- 연관 관광지 (함께 가는 곳)
+
+/** YYYYMM 문자열을 n개월 전으로 옮긴다. */
+function shiftYm(date, monthsBack) {
+  const d = new Date(date.getFullYear(), date.getMonth() - monthsBack, 1);
+  return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// 연관 관광지는 마을이 바뀌지 않는 한 같은 응답이므로 세션 내에서 캐시한다.
+const relatedCache = new Map();
+
+/**
+ * 마을 하나의 "함께 가는 곳" 목록. Tmap 이동 패턴 기반 연관 관광지(TarRlteTarService1).
+ *
+ * baseYm(기준년월)은 집계가 끝난 달까지만 데이터가 있어서, 전월부터 최대 6개월까지
+ * 거슬러 올라가며 결과가 있는 달을 찾는다. 키가 없거나 조회에 실패하면 빈 배열을
+ * 돌려줘서 팝업에서 해당 영역만 빠지게 한다(화면은 깨지지 않음).
+ *
+ * @returns {Promise<Array<{name: string, category: string}>>}
+ */
+export async function fetchRelatedSpots(village, { limit = 4 } = {}) {
+  if (!village?.related || !hasTourApiKey()) return [];
+  if (relatedCache.has(village.id)) return relatedCache.get(village.id);
+
+  const { areaCd, signguCd, keyword } = village.related;
+  const now = new Date();
+
+  for (let back = 1; back <= 6; back += 1) {
+    try {
+      const items = await fetchRelatedAttractionsByKeyword(keyword, {
+        areaCd,
+        signguCd,
+        baseYm: shiftYm(now, back),
+        numOfRows: 20,
+      });
+      if (items.length === 0) continue;
+
+      // 앵커(경기전 등)와 마을 자신은 제외한다. 앵커가 마을 안의 랜드마크라서
+      // 마을 이름이 연관 항목으로 같이 올라오는데, 팝업 제목과 중복돼 보인다.
+      // 숙박은 별도의 "머무르기" 화면이 담당하므로 여기서는 뺀다.
+      const selfNames = new Set([keyword, village.name, village.name.replace(/\s/g, "")]);
+      const spots = items
+        .filter((item) => item.name && !selfNames.has(item.name.replace(/\s/g, "")))
+        .filter((item) => item.raw?.rlteCtgryMclsNm !== "숙박")
+        .slice(0, limit)
+        .map((item) => ({ name: item.name, category: item.raw?.rlteCtgryMclsNm ?? "" }));
+      relatedCache.set(village.id, spots);
+      return spots;
+    } catch (err) {
+      console.warn(`[villageApi] "${village.name}" 연관 관광지 조회 실패, 생략합니다.`, err);
+      return [];
+    }
+  }
+  return [];
 }

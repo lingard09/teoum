@@ -39,6 +39,9 @@ export const villages = [
     event: "전통 상설 야간개장 프로그램 (금~토 19:30)",
     lat: 35.8182727649,
     lng: 127.1536126138,
+    // 연관 관광지 조회용(TarRlteTarService1). areaCd/signguCd는 TourAPI의
+    // areaCode가 아니라 법정동(행정표준) 코드다 — 실호출로 확인. 전주시 완산구.
+    related: { areaCd: "52", signguCd: "52111", keyword: "경기전" },
     featured: true,
   },
   {
@@ -62,6 +65,9 @@ export const villages = [
     event: "하회별신굿탈놀이 상설공연 (주말 15:00)",
     lat: 36.5506148855,
     lng: 128.5282935032,
+    // 연관 관광지 조회용(TarRlteTarService1). areaCd/signguCd는 TourAPI의
+    // areaCode가 아니라 법정동(행정표준) 코드다 — 실호출로 확인. 안동시.
+    related: { areaCd: "47", signguCd: "47170", keyword: "하회마을" },
     featured: true,
     unesco: true,
   },
@@ -86,6 +92,9 @@ export const villages = [
     event: "정자초롱 야간산책 프로그램 (매일 19:00)",
     lat: 35.8296308266,
     lng: 129.2146933674,
+    // 연관 관광지 조회용(TarRlteTarService1). areaCd/signguCd는 TourAPI의
+    // areaCode가 아니라 법정동(행정표준) 코드다 — 실호출로 확인. 경주시.
+    related: { areaCd: "47", signguCd: "47130", keyword: "교촌한옥마을" },
     featured: true,
   },
   {
@@ -112,6 +121,9 @@ export const villages = [
     event: "한복 거리 퍼레이드 (매월 마지막 토요일)",
     lat: 37.5790529392,
     lng: 126.9867060298,
+    // 연관 관광지 조회용(TarRlteTarService1). areaCd/signguCd는 TourAPI의
+    // areaCode가 아니라 법정동(행정표준) 코드다 — 실호출로 확인. 종로구.
+    related: { areaCd: "11", signguCd: "11110", keyword: "북촌한옥마을" },
     featured: true,
   },
 ];

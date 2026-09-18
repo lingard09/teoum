@@ -97,3 +97,42 @@
 .location-popup__cta:hover {
   background: var(--color-accent-hover);
 }
+
+/* 연관 관광지(TarRlteTarService1) — 데이터가 있을 때만 렌더된다. */
+.location-popup__related {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.location-popup__related-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-tiny);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.location-popup__related-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.location-popup__related-list li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: var(--fs-tiny);
+}
+
+.location-popup__related-name {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.location-popup__related-category {
+  color: var(--color-text-muted);
+}
