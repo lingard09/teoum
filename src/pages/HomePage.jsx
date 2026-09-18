@@ -7,7 +7,7 @@ import ExperienceCard from "../components/common/ExperienceCard.jsx";
 import Footer from "../components/common/Footer.jsx";
 import { fetchFeaturedVillages } from "../api/villageApi.js";
 import { stories } from "../data/stories.js";
-import { experiences } from "../data/experiences.js";
+import { homeExperiences } from "../data/homeExperiences.js";
 import "./HomePage.css";
 
 function HomePage() {
@@ -74,7 +74,7 @@ function HomePage() {
             </div>
           </div>
           <div className="experience-grid">
-            {experiences.map((exp) => (
+            {homeExperiences.map((exp) => (
               <ExperienceCard key={exp.id} experience={exp} />
             ))}
           </div>

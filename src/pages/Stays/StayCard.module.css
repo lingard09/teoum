@@ -1,0 +1,233 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 4px 20px 0 rgba(46, 29, 19, 0.06);
+}
+
+.media {
+  position: relative;
+  height: 220px;
+  background: var(--color-surface-2);
+}
+
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+  white-space: nowrap;
+}
+
+.dark {
+  background: rgba(74, 46, 27, 0.9);
+  backdrop-filter: blur(2px);
+  color: #fff;
+}
+
+.mint {
+  background: rgba(196, 231, 219, 0.95);
+  color: #49695f;
+}
+
+.neutral {
+  background: rgba(239, 231, 220, 0.9);
+  color: #1e1b15;
+}
+
+.saveButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+
+.saveButtonActive {
+  color: #c0392b;
+}
+
+.locationTag {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 0.44px;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.06)) drop-shadow(0 4px 1.5px rgba(0, 0, 0, 0.07));
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+}
+
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subtitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.subtitle {
+  color: var(--color-green);
+  font-size: 11px;
+  letter-spacing: 0.44px;
+}
+
+.rating {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.ratingValue {
+  color: var(--color-ink);
+  font-family: var(--font-latin);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.44px;
+}
+
+.reviewCount {
+  color: var(--color-ink-sub);
+  font-family: var(--font-latin);
+  font-size: 11px;
+  letter-spacing: 0.44px;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.title span {
+  display: block;
+}
+
+.description {
+  margin: 0;
+  color: var(--color-ink-sub);
+  font-size: 13px;
+  line-height: 21.13px;
+}
+
+.description span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.amenity {
+  padding: 2px 8px;
+  border-radius: 2px;
+  background: var(--color-surface-2);
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  letter-spacing: 0.44px;
+  white-space: nowrap;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(233, 225, 215, 0.6);
+}
+
+.priceBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.priceLabel {
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  letter-spacing: 0.44px;
+}
+
+.priceValue {
+  color: var(--color-ink);
+  font-size: 20px;
+}
+
+.priceUnit {
+  margin-left: 2px;
+  color: var(--color-ink-sub);
+  font-family: var(--font-latin);
+  font-size: 13px;
+}
+
+.reserveButton {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--color-ink);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 0.44px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.reserveButton:hover {
+  filter: brightness(1.15);
+}

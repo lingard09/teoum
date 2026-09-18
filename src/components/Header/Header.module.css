@@ -1,0 +1,271 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 248, 241, 0.9);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 8px 0 rgba(46, 29, 19, 0.04);
+}
+
+.inner {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 1360px;
+  height: 80px;
+  margin: 0 auto;
+  padding: 0 80px;
+}
+
+.left {
+  display: flex;
+  flex-shrink: 1;
+  align-items: center;
+  gap: 32px;
+  min-width: 0;
+}
+
+.brand {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.brandMark {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 43px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--color-surface-2);
+  box-shadow: 0 2px 4px rgba(49, 25, 8, 0.06);
+}
+
+.brandMarkImage {
+  width: 27px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+}
+
+.brandTitle {
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.brandSubtitle {
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 0.55px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.nav {
+  display: flex;
+  flex-shrink: 1;
+  align-items: center;
+  gap: 32px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav::-webkit-scrollbar {
+  display: none;
+}
+
+.navLink {
+  flex-shrink: 0;
+  padding: 8px 0 6px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--color-ink-sub);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.28px;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: default;
+}
+
+a.navLink {
+  cursor: pointer;
+}
+
+.navLinkActive {
+  border-bottom-color: var(--color-ink);
+  color: var(--color-ink);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.right {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 20px;
+}
+
+.languageButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.44px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 20px;
+  background: var(--color-line);
+}
+
+.userButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink-sub);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.28px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 뷰포트가 좁아질수록 좌/우 그룹이 한 줄에 다 들어가도록
+   패딩 → 간격 → 폰트 크기 순으로 단계적으로 줄인다.
+   항목을 숨기지 않고(overflow: hidden 금지) .nav만 최후 수단으로 가로 스크롤 허용. */
+@media (max-width: 1180px) {
+  .inner {
+    padding: 0 40px;
+  }
+
+  .left {
+    gap: 24px;
+  }
+
+  .nav {
+    gap: 20px;
+  }
+
+  .right {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 960px) {
+  .inner {
+    padding: 0 24px;
+  }
+
+  .brandMark {
+    width: 36px;
+    height: 37px;
+  }
+
+  .brandMarkImage {
+    width: 22px;
+    height: 23px;
+  }
+
+  .brandSubtitle {
+    display: none;
+  }
+
+  .left {
+    gap: 16px;
+  }
+
+  .nav {
+    gap: 14px;
+  }
+
+  .navLink {
+    font-size: 12px;
+  }
+
+  .navLinkActive {
+    font-size: 14px;
+  }
+
+  .languageButton {
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 720px) {
+  .inner {
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  .brandTitle {
+    font-size: 17px;
+  }
+
+  .left {
+    gap: 12px;
+  }
+
+  .nav {
+    gap: 10px;
+  }
+
+  .right {
+    gap: 10px;
+  }
+
+  .languageButton {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+
+  .userButton {
+    font-size: 13px;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+}

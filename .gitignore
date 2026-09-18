@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 
-# 공공데이터포털 서비스키 등 비밀값
+# 실제 API 서비스키가 들어가는 파일 — .env.example만 커밋한다.
 .env
 .env.*
 !.env.example

@@ -1,0 +1,79 @@
+.footer {
+  padding-top: 72px;
+  padding-bottom: 48px;
+  background: var(--color-surface);
+  box-shadow: 0 -1px 4px rgba(46, 29, 19, 0.03);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 80px;
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 512px;
+}
+
+.brandMark {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background: var(--color-surface-3);
+  overflow: hidden;
+}
+
+.brandMarkImage {
+  width: 20px;
+  height: 21px;
+  object-fit: contain;
+}
+
+.brandTitle {
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+}
+
+.description {
+  max-width: 512px;
+  margin: 0;
+  color: var(--color-ink-sub);
+  font-size: 15px;
+  line-height: 24.38px;
+}
+
+.badge {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.44px;
+}
+
+@media (max-width: 720px) {
+  .inner {
+    padding: 0 24px;
+  }
+
+  .badge {
+    white-space: normal;
+  }
+}

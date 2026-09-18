@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { loadMyPage, removeScrap } from '../../api/mypageApi.js'
 import { cx } from '../../utils/cx.js'
+import Header from '../../components/Header/Header.jsx'
+import Footer from '../../components/Footer/Footer.jsx'
 import ProfileHero from './ProfileHero.jsx'
 import styles from './MyPage.module.css'
 
@@ -31,11 +33,15 @@ function MyPage() {
 
   if (!data) {
     return (
-      <main className={styles.page}>
-        <div className={styles.container}>
-          <p className={styles.loading}>여정 보관함을 불러오는 중…</p>
-        </div>
-      </main>
+      <>
+        <Header />
+        <main className={styles.page}>
+          <div className={styles.container}>
+            <p className={styles.loading}>여정 보관함을 불러오는 중…</p>
+          </div>
+        </main>
+        <Footer />
+      </>
     )
   }
 
@@ -46,33 +52,37 @@ function MyPage() {
   ]
 
   return (
-    <main className={styles.page}>
-      <div className={styles.container}>
-        <ProfileHero profile={data.profile} />
+    <>
+      <Header />
+      <main className={styles.page}>
+        <div className={styles.container}>
+          <ProfileHero profile={data.profile} />
 
-        {data.source === 'fallback' && (
-          <p className={styles.notice}>
-            Firestore에 연결하지 못해 임시 데이터를 보여주고 있습니다. 변경한 내용은 저장되지
-            않습니다.
-          </p>
-        )}
+          {data.source === 'fallback' && (
+            <p className={styles.notice}>
+              Firestore에 연결하지 못해 임시 데이터를 보여주고 있습니다. 변경한 내용은 저장되지
+              않습니다.
+            </p>
+          )}
 
-        <nav className={styles.tabs} aria-label="나의 여정 보관함">
-          {tabs.map((tab) => (
-            <NavLink
-              key={tab.to}
-              to={tab.to}
-              className={({ isActive }) => cx(styles.tab, isActive && styles.active)}
-            >
-              {tab.label}
-              {tab.count != null && <span className={styles.count}>{tab.count}</span>}
-            </NavLink>
-          ))}
-        </nav>
+          <nav className={styles.tabs} aria-label="나의 여정 보관함">
+            {tabs.map((tab) => (
+              <NavLink
+                key={tab.to}
+                to={tab.to}
+                className={({ isActive }) => cx(styles.tab, isActive && styles.active)}
+              >
+                {tab.label}
+                {tab.count != null && <span className={styles.count}>{tab.count}</span>}
+              </NavLink>
+            ))}
+          </nav>
 
-        <Outlet context={{ ...data, unscrap }} />
-      </div>
-    </main>
+          <Outlet context={{ ...data, unscrap }} />
+        </div>
+      </main>
+      <Footer />
+    </>
   )
 }
 
