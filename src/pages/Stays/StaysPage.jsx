@@ -16,6 +16,8 @@ import {
   stays,
 } from '../../data/stays.js'
 import { addScrap, fetchScrapIds, removeScrap } from '../../api/mypageApi.js'
+import { fetchStays } from '../../api/stayApi.js'
+import ApiStayCard from './ApiStayCard.jsx'
 import StayCard from './StayCard.jsx'
 import styles from './StaysPage.module.css'
 
@@ -31,6 +33,20 @@ function StaysPage() {
 
   // 스크랩 상태는 카드마다 따로 읽으면 요청이 카드 수만큼 나가므로 페이지에서 한 번만 읽는다.
   const [scrappedIds, setScrappedIds] = useState(() => new Set())
+
+  // TourAPI 숙박(contentTypeId=32)에서 실제 한옥 숙소를 받아온다.
+  // 실패하거나 키가 없으면 apiStays가 비어서 큐레이션 목업만 보인다.
+  const [apiStays, setApiStays] = useState([])
+
+  useEffect(() => {
+    let alive = true
+    fetchStays().then(({ stays: list }) => {
+      if (alive) setApiStays(list)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -56,12 +72,13 @@ function StaysPage() {
       if (wasScrapped) {
         await removeScrap(stay.id)
       } else {
+        // Firestore는 undefined 값을 거부한다. 이미지 출처에 따라 키를 갈라 넣는다.
         await addScrap({
           id: stay.id,
           location: stay.location,
           title: stay.name,
           description: stay.description.join(' '),
-          imageKey: `stay-${stay.id}`,
+          ...(stay.apiImage ? { imageUrl: stay.apiImage } : { imageKey: `stay-${stay.id}` }),
         })
       }
     } catch (err) {
@@ -207,6 +224,24 @@ function StaysPage() {
                   stay={stay}
                   saved={scrappedIds.has(stay.id)}
                   onToggleSave={() => toggleScrap(stay)}
+                />
+              ))}
+
+              {apiStays.map((stay) => (
+                <ApiStayCard
+                  key={stay.id}
+                  stay={stay}
+                  saved={scrappedIds.has(stay.id)}
+                  onToggleSave={() =>
+                    toggleScrap({
+                      id: stay.id,
+                      name: stay.name,
+                      location: stay.location,
+                      title: [stay.name],
+                      description: ['한국관광공사 TourAPI 등록 한옥 숙소'],
+                      apiImage: stay.image,
+                    })
+                  }
                 />
               ))}
             </div>

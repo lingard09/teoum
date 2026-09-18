@@ -14,9 +14,11 @@ export const quickFilters = [
   { id: "route", label: "당일 여행경로", icon: "route" },
 ];
 
+// 평점 정렬은 뺐다 — TourAPI가 평점을 주지 않아 정렬할 실제 값이 없다.
+// "방문자 많은순"은 관광빅데이터(DataLabService)의 지역별 방문자수를 쓴다.
 export const sortOptions = [
-  { id: "popular", label: "TourAPI 인기순" },
-  { id: "rating", label: "평점 높은순" },
+  { id: "popular", label: "TourAPI 기본순" },
+  { id: "visitors", label: "방문자 많은순" },
   { id: "congestion", label: "혼잡도 낮은순" },
-  { id: "distance", label: "거리 가까운순" },
+  { id: "name", label: "이름순" },
 ];

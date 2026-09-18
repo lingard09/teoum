@@ -238,3 +238,25 @@
 .reserveButton:hover {
   filter: brightness(1.15);
 }
+
+/* TourAPI 카드 전용. 요금 자리에 문의 전화가 들어간다. */
+.dark {
+  background: var(--color-ink);
+  color: #fff;
+}
+
+.apiTel {
+  color: var(--color-ink);
+  font-family: var(--font-latin);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* TourAPI 주소는 큐레이션 문구보다 길어서 카드 폭을 넘긴다. 한 줄로 자른다. */
+.locationTag span {
+  display: block;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

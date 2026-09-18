@@ -67,23 +67,6 @@ function truncate(text, max) {
   return text.length > max ? `${text.slice(0, max)}…` : text;
 }
 
-/**
- * 이름/ID 문자열을 시드로 4.50~4.94 사이 평점과 그럴듯한 리뷰수를 만든다.
- * TourAPI는 평점·리뷰 데이터를 전혀 제공하지 않아서(관광지 정보 API일 뿐
- * 리뷰 플랫폼이 아님), 카드 디자인을 큐레이션 항목과 통일하기 위해 만든
- * 표시용 임의값이다 — 실데이터가 아니라는 점을 코드 차원에서 명확히 남겨둔다.
- */
-function pseudoRatingFor(seed) {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  }
-  const rating = Math.round((4.5 + (hash % 45) / 100) * 100) / 100;
-  const count = 300 + (hash % 4700);
-  const reviewCount = count >= 1000 ? `${(count / 1000).toFixed(1)}천` : `${count}`;
-  return { rating, reviewCount };
-}
-
 const CONGESTION_LABEL = { low: "낮음", medium: "보통", high: "혼잡" };
 
 /**
@@ -98,14 +81,16 @@ function congestionFromVisitorRank(ratio) {
 
 /**
  * villages.js에 큐레이션되지 않은, TourAPI 검색 결과로만 존재하는 항목을
- * 우리 Village 모양으로 매핑한다. 소개문구는 TourAPI 개요(overview)를 쓰고,
- * 평점은 표시용 임의값(pseudoRatingFor), 혼잡도는 지역별 방문자 빅데이터
- * 실데이터를 상대 순위로 환산한 값이다. 체험 태그처럼 TourAPI에 아예 없는
- * 필드는 넣지 않는다 — TourismListItem/LocationPopup이 없으면 알아서 숨긴다.
+ * 우리 Village 모양으로 매핑한다. 소개문구는 TourAPI 개요(overview),
+ * 혼잡도는 지역별 방문자 빅데이터를 상대 순위로 환산한 값이다.
+ *
+ * 평점/리뷰수는 넣지 않는다. TourAPI는 관광정보 API일 뿐 리뷰 플랫폼이 아니라
+ * 평점 데이터를 제공하지 않으므로, 있는 척하는 값을 만들어 붙이지 않는다.
+ * 체험 태그처럼 TourAPI에 없는 필드도 마찬가지 — TourismListItem/LocationPopup이
+ * 값이 없으면 알아서 숨긴다.
  */
 function mapApiOnlyVillage(result, overview) {
   const desc = stripHtml(overview);
-  const { rating, reviewCount } = pseudoRatingFor(String(result.contentId));
   return {
     id: `api-${result.contentId}`,
     name: result.name,
@@ -118,8 +103,6 @@ function mapApiOnlyVillage(result, overview) {
     address: result.address,
     lat: result.lat,
     lng: result.lng,
-    rating,
-    reviewCount,
     tourApiContentId: result.contentId,
     tourApiTel: result.tel,
     isApiOnly: true,

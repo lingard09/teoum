@@ -65,7 +65,8 @@ function hydrateReservation(reservation) {
 }
 
 function hydrateScrap(scrap) {
-  return { ...scrap, image: resolveImage(scrap.imageKey) };
+  // TourAPI에서 담은 항목은 번들 에셋이 아니라 원격 URL을 그대로 들고 있다.
+  return { ...scrap, image: scrap.imageUrl ?? resolveImage(scrap.imageKey) };
 }
 
 function hydrateCourse(course) {

@@ -16,6 +16,8 @@ import seoulBukchonMapImage from "../assets/images/villages-map/seoul-bukchon.pn
  *
  * image: 홈 큐레이션 카드용, mapImage: 지도 탐색 목록 카드용 (Figma 디자인 원본 이미지)
  */
+// 평점/리뷰수 필드는 두지 않는다. TourAPI에는 평점 데이터가 없고, 시안의
+// "★ 4.90 (4.2만)" 값을 그대로 박아두면 실데이터처럼 보이기 때문이다.
 export const villages = [
   {
     id: "jeonju",
@@ -28,8 +30,6 @@ export const villages = [
     linkLabel: "도보 순환 코스",
     image: jeonjuImage,
     mapImage: jeonjuMapImage,
-    rating: 4.9,
-    reviewCount: "4.2만",
     tag: "당일코스 인기",
     tagIcon: "walk",
     congestion: { level: "low", label: "낮음", score: 3.3 },
@@ -54,8 +54,6 @@ export const villages = [
     linkLabel: "유네스코 세계유산",
     image: andongImage,
     mapImage: andongMapImage,
-    rating: 4.95,
-    reviewCount: "1.8만",
     tag: "당일코스 인기",
     tagIcon: "home",
     congestion: { level: "medium", label: "여유", score: 4.0 },
@@ -81,8 +79,6 @@ export const villages = [
     linkLabel: "역사·문화체험",
     image: gyeongjuImage,
     mapImage: gyeongjuMapImage,
-    rating: 4.88,
-    reviewCount: "2.1만",
     tag: "실시간 맛집",
     tagIcon: "food",
     congestion: { level: "medium", label: "보통", score: 4.1 },
@@ -110,8 +106,6 @@ export const villages = [
     linkLabel: "도심 문화 산책",
     image: seoulBukchonImage,
     mapImage: seoulBukchonMapImage,
-    rating: 4.82,
-    reviewCount: "5.3만",
     tag: "실시간 도보 산책",
     tagIcon: "walk",
     congestion: { level: "high", label: "혼잡", score: 4.6 },

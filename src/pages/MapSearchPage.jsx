@@ -34,16 +34,17 @@ function MapSearchPage() {
     });
 
     const effectiveSort = quickFilter === "congestion" ? "congestion" : sortBy;
-    if (effectiveSort === "rating") {
-      list = [...list].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    if (effectiveSort === "visitors") {
+      // 혼잡도 점수는 지역 방문자수 순위에서 나온 값이라, 높을수록 방문자가 많다.
+      list = [...list].sort((a, b) => (b.congestion?.score ?? 0) - (a.congestion?.score ?? 0));
     } else if (effectiveSort === "congestion") {
       list = [...list].sort(
         (a, b) => (a.congestion?.score ?? 99) - (b.congestion?.score ?? 99)
       );
-    } else if (effectiveSort === "distance") {
-      list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (effectiveSort === "name") {
+      list = [...list].sort((a, b) => a.name.localeCompare(b.name, "ko"));
     }
-    // "popular" (TourAPI 인기순) keeps the API-provided display order.
+    // "popular"은 TourAPI가 내려준 순서를 그대로 쓴다.
 
     return list;
   }, [villages, quickFilter, sortBy]);
