@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# 실제 API 서비스키가 들어가는 파일 — .env.example만 커밋한다.
+.env
+.env.local
+.env.*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
