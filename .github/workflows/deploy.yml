@@ -26,6 +26,8 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
+          # GitHub Pages는 /teoum/ 하위 경로로 서빙된다(Cloudflare Pages는 루트라 불필요).
+          VITE_BASE: /teoum/
           # 저장소 Settings → Secrets and variables → Actions에 아래 값들을 등록해야
           # 배포본에서도 TourAPI/지도 실연동이 됨. 없으면 자동으로 mock 데이터로 표시됨.
           VITE_TOUR_API_KEY: ${{ secrets.VITE_TOUR_API_KEY }}

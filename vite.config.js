@@ -3,8 +3,9 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // GitHub Pages는 https://<user>.github.io/teoum/ 하위 경로로 서빙됨
-  base: '/teoum/',
+  // 배포 경로. Cloudflare Pages는 루트(/)로 서빙하므로 기본값이 '/'다.
+  // GitHub Pages처럼 하위 경로로 서빙하는 곳은 빌드 시 VITE_BASE=/teoum/ 를 넘긴다.
+  base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
   server: {
     proxy: {
