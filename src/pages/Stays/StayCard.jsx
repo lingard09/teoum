@@ -1,12 +1,10 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Icon from '../../components/Icon/Icon.jsx'
 import { icons } from '../../assets/icons/index.js'
 import { cx } from '../../utils/cx.js'
 import styles from './StayCard.module.css'
 
-function StayCard({ stay }) {
-  const [saved, setSaved] = useState(false)
+function StayCard({ stay, saved, onToggleSave }) {
   const { image, badges, location, subtitle, title, description, amenities, rating, reviewCount, price } = stay
 
   return (
@@ -24,9 +22,9 @@ function StayCard({ stay }) {
         <button
           type="button"
           className={cx(styles.saveButton, saved && styles.saveButtonActive)}
-          onClick={() => setSaved((v) => !v)}
+          onClick={onToggleSave}
           aria-pressed={saved}
-          aria-label="관심 한옥 보관"
+          aria-label={saved ? "관심 한옥 보관 해제" : "관심 한옥 보관"}
         >
           <Icon {...icons.stayHeart} />
         </button>

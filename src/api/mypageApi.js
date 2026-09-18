@@ -17,6 +17,7 @@ import {
   getDocs,
   orderBy,
   query,
+  setDoc,
   writeBatch,
 } from "firebase/firestore";
 import { db, ensureUser } from "./firebase.js";
@@ -181,4 +182,46 @@ export async function loadMyPage() {
 export async function removeScrap(scrapId) {
   const uid = await ensureUser();
   await deleteDoc(doc(userCollection(uid, "scraps"), scrapId));
+}
+
+/**
+ * 스크랩 추가. 문서 id를 대상의 id로 쓰기 때문에 같은 대상을 여러 번 눌러도
+ * 문서가 늘어나지 않고 덮어써진다.
+ *
+ * @param {{id: string, location: string, title: string, description: string, imageKey: string}} scrap
+ */
+export async function addScrap(scrap) {
+  const uid = await ensureUser();
+  const { id, ...fields } = scrap;
+  await setDoc(doc(userCollection(uid, "scraps"), id), {
+    ...fields,
+    scrapedAt: formatScrapDate(new Date()),
+    // 마이페이지는 order로 정렬한다. 새로 담은 것이 위로 오도록 음수 타임스탬프를 쓴다.
+    order: -Date.now(),
+  });
+}
+
+/** 마이페이지 카드에 쓰는 "2026.03.28" 형식. */
+function formatScrapDate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}.${m}.${d}`;
+}
+
+/**
+ * 스크랩된 대상의 id 집합. 목록 화면에서 하트의 on/off를 칠하는 용도라
+ * 문서 전체를 읽지 않고 id만 본다. 실패하면 빈 집합(전부 꺼진 상태)이다.
+ *
+ * @returns {Promise<Set<string>>}
+ */
+export async function fetchScrapIds() {
+  try {
+    const uid = await withTimeout(ensureUser(), LOAD_TIMEOUT_MS);
+    const snap = await getDocs(userCollection(uid, "scraps"));
+    return new Set(snap.docs.map((d) => d.id));
+  } catch (err) {
+    console.warn("[mypageApi] 스크랩 목록 조회 실패, 빈 상태로 표시합니다.", err);
+    return new Set();
+  }
 }

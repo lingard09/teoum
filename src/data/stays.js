@@ -50,6 +50,9 @@ export const pageCount = 14
 export const stays = [
   {
     id: 'andong-yemijeong',
+    // title은 시안 줄바꿈 배열이라 이어붙이는 규칙이 일정하지 않다(독+채는 붙고 노천+자쿠지는 띄움).
+    // 스크랩 저장처럼 데이터로 쓸 때는 이 name을 쓴다.
+    name: '안동 예미정 본채 (300년 사대부 독채 고택)',
     image: andongYemijeongStay,
     badges: [
       { label: '독채 고택', tone: 'dark' },
@@ -66,6 +69,9 @@ export const stays = [
   },
   {
     id: 'eunpyeong-numaru',
+    // title은 시안 줄바꿈 배열이라 이어붙이는 규칙이 일정하지 않다(독+채는 붙고 노천+자쿠지는 띄움).
+    // 스크랩 저장처럼 데이터로 쓸 때는 이 name을 쓴다.
+    name: '은평 일인일잔 누마루 스테이',
     image: eunpyeongNumaruStay,
     badges: [
       { label: '북한산 파노라마 뷰', tone: 'dark' },
@@ -82,6 +88,9 @@ export const stays = [
   },
   {
     id: 'jeonju-hakindang',
+    // title은 시안 줄바꿈 배열이라 이어붙이는 규칙이 일정하지 않다(독+채는 붙고 노천+자쿠지는 띄움).
+    // 스크랩 저장처럼 데이터로 쓸 때는 이 name을 쓴다.
+    name: "전주 경기전 돌담길 '학인당' 행랑채",
     image: jeonjuHakindang,
     badges: [
       { label: '태조 어진 인근', tone: 'dark' },
@@ -98,6 +107,9 @@ export const stays = [
   },
   {
     id: 'hahoe-yangjindang',
+    // title은 시안 줄바꿈 배열이라 이어붙이는 규칙이 일정하지 않다(독+채는 붙고 노천+자쿠지는 띄움).
+    // 스크랩 저장처럼 데이터로 쓸 때는 이 name을 쓴다.
+    name: '하회마을 양진당 묵계재 (풍산 류씨 종택)',
     image: hahoeYangjindang,
     badges: [
       { label: '유네스코 고택', tone: 'dark' },
@@ -114,6 +126,9 @@ export const stays = [
   },
   {
     id: 'gyeongju-woljeongjae',
+    // title은 시안 줄바꿈 배열이라 이어붙이는 규칙이 일정하지 않다(독+채는 붙고 노천+자쿠지는 띄움).
+    // 스크랩 저장처럼 데이터로 쓸 때는 이 name을 쓴다.
+    name: '경주 교촌 월정재 (프라이빗 노천 자쿠지 한옥)',
     image: gyeongjuWoljeongjae,
     badges: [
       { label: '노천 히노끼 스파', tone: 'dark' },
@@ -130,6 +145,9 @@ export const stays = [
   },
   {
     id: 'gangneung-seongyojang',
+    // title은 시안 줄바꿈 배열이라 이어붙이는 규칙이 일정하지 않다(독+채는 붙고 노천+자쿠지는 띄움).
+    // 스크랩 저장처럼 데이터로 쓸 때는 이 name을 쓴다.
+    name: '강릉 선교장 홍예헌 별채',
     image: gangneungSeongyojang,
     badges: [
       { label: '국가민속문화재', tone: 'dark' },

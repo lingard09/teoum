@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Header from '../../components/Header/Header.jsx'
 import Footer from '../../components/Footer/Footer.jsx'
 import Icon from '../../components/Icon/Icon.jsx'
@@ -15,6 +15,7 @@ import {
   pageCount,
   stays,
 } from '../../data/stays.js'
+import { addScrap, fetchScrapIds, removeScrap } from '../../api/mypageApi.js'
 import StayCard from './StayCard.jsx'
 import styles from './StaysPage.module.css'
 
@@ -27,6 +28,52 @@ function StaysPage() {
     () => new Set(conditionFilters.filter((f) => f.defaultChecked).map((f) => f.id)),
   )
   const [currentPage, setCurrentPage] = useState(1)
+
+  // 스크랩 상태는 카드마다 따로 읽으면 요청이 카드 수만큼 나가므로 페이지에서 한 번만 읽는다.
+  const [scrappedIds, setScrappedIds] = useState(() => new Set())
+
+  useEffect(() => {
+    let alive = true
+    fetchScrapIds().then((ids) => {
+      if (alive) setScrappedIds(ids)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  // 낙관적 업데이트: 하트를 먼저 칠하고, 저장이 실패하면 되돌린다.
+  const toggleScrap = useCallback(async (stay) => {
+    const wasScrapped = scrappedIds.has(stay.id)
+    setScrappedIds((prev) => {
+      const next = new Set(prev)
+      if (wasScrapped) next.delete(stay.id)
+      else next.add(stay.id)
+      return next
+    })
+
+    try {
+      if (wasScrapped) {
+        await removeScrap(stay.id)
+      } else {
+        await addScrap({
+          id: stay.id,
+          location: stay.location,
+          title: stay.name,
+          description: stay.description.join(' '),
+          imageKey: `stay-${stay.id}`,
+        })
+      }
+    } catch (err) {
+      console.warn('[StaysPage] 스크랩 저장 실패, 되돌립니다.', err)
+      setScrappedIds((prev) => {
+        const next = new Set(prev)
+        if (wasScrapped) next.add(stay.id)
+        else next.delete(stay.id)
+        return next
+      })
+    }
+  }, [scrappedIds])
 
   function toggleCondition(id) {
     setCheckedConditions((prev) => {
@@ -155,7 +202,12 @@ function StaysPage() {
           <div className={styles.container}>
             <div className={styles.grid}>
               {stays.map((stay) => (
-                <StayCard key={stay.id} stay={stay} />
+                <StayCard
+                  key={stay.id}
+                  stay={stay}
+                  saved={scrappedIds.has(stay.id)}
+                  onToggleSave={() => toggleScrap(stay)}
+                />
               ))}
             </div>
 

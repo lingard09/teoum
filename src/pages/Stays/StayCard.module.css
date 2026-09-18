@@ -71,8 +71,15 @@
   cursor: pointer;
 }
 
+/* 하트는 <img>라서 color가 먹지 않는다(기존 color만 바꾸던 규칙은 화면에
+   아무 변화도 주지 못했다). 담긴 상태는 버튼 배경을 채워서 표시하고,
+   아이콘은 filter로 흰색으로 반전시킨다. */
 .saveButtonActive {
-  color: #c0392b;
+  background: var(--color-ink);
+}
+
+.saveButtonActive img {
+  filter: brightness(0) invert(1);
 }
 
 .locationTag {
