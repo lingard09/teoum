@@ -1,0 +1,240 @@
+/* AI 코스 카드 (피그마 108:6708). */
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 8px 24px 0 rgba(46, 29, 19, 0.06);
+}
+
+.media {
+  position: relative;
+  height: 224px;
+  flex-shrink: 0;
+}
+
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 하단 메타 텍스트가 사진 위에서도 읽히도록 어두운 그라데이션을 깐다. */
+.gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(49, 25, 8, 0.8) 0%, rgba(49, 25, 8, 0) 50%);
+}
+
+.badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(2px);
+  color: var(--color-ink);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+  white-space: nowrap;
+}
+
+.badgeGreen {
+  padding: 4px 10px;
+  background: var(--color-green);
+  color: #fff;
+}
+
+.bookmark {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.mediaMeta {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+  font-family: var(--font-latin);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.metaMint {
+  color: var(--color-mint-bg);
+  font-family: var(--font-sans);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ratingValue {
+  color: var(--color-ink);
+  font-family: var(--font-latin);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: 0.28px;
+}
+
+.reviewCount {
+  color: var(--color-ink-sub);
+  font-family: var(--font-latin);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 28px;
+}
+
+.description {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  color: var(--color-ink-sub);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.waypoints {
+  margin-top: auto;
+  padding: 12px;
+  border-radius: 4px;
+  background: var(--color-surface);
+}
+
+.waypointHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.waypointTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-ink);
+  font-family: var(--font-latin);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+}
+
+.waypointCount {
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+}
+
+/* 시안은 스팟 4개를 2열로 늘어놓는다. */
+.waypointList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.waypoint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.waypointStep {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-green);
+  color: #fff;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.waypointName {
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: #fff;
+  color: var(--color-count-ink);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  margin-top: 4px;
+  border-radius: 4px;
+  background: var(--color-surface-3);
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.28px;
+  text-decoration: none;
+}
+
+.cta:hover {
+  filter: brightness(0.97);
+}

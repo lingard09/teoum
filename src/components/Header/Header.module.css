@@ -164,12 +164,25 @@ a.navLink {
   cursor: pointer;
 }
 
+/* avatar.png는 1376x768 합성 이미지라 통째로 넣으면 인물 여러 명이 찌그러져 보인다.
+   MyPage/ProfileHero와 같은 피그마 크롭 값으로 캐릭터 한 명만 잘라 쓴다
+   (양쪽 컨테이너가 모두 정사각형이라 퍼센트 값이 그대로 통한다). */
 .avatar {
+  position: relative;
   flex-shrink: 0;
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  object-fit: cover;
+  overflow: hidden;
+}
+
+.avatar img {
+  position: absolute;
+  top: -77.59%;
+  left: -15.45%;
+  width: 465.04%;
+  max-width: none;
+  height: 261.69%;
 }
 
 /* 뷰포트가 좁아질수록 좌/우 그룹이 한 줄에 다 들어가도록

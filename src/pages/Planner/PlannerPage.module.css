@@ -1,0 +1,419 @@
+/* AI 맞춤 여행 코스 플래너 (피그마 1:553). 색/그림자/폰트는 src/index.css 토큰 사용. */
+
+.topBar {
+  border-bottom: 1px solid rgba(233, 225, 215, 0.4);
+  background: rgba(251, 242, 231, 0.7);
+}
+
+.topInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  max-width: 1360px;
+  min-height: 116px;
+  margin: 0 auto;
+  padding: 16px 80px;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 48px;
+  letter-spacing: -0.9px;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--color-ink-sub);
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.conditions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 11px 17px;
+  border: 1px solid rgba(233, 225, 215, 0.4);
+  border-radius: 8px;
+  background: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.condition {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-ink);
+  font-size: 16px;
+  line-height: 24px;
+  white-space: nowrap;
+}
+
+.conditionDivider {
+  width: 1px;
+  height: 16px;
+  margin-right: 8px;
+  background: var(--color-line);
+}
+
+.changeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 16px;
+  line-height: 24px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.changeButton:hover {
+  filter: brightness(1.15);
+}
+
+/* 시안은 본문을 896px 폭으로 가운데 정렬한다. */
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 896px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(233, 225, 215, 0.4);
+}
+
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 28px;
+}
+
+.countBadge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: var(--color-surface-2);
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+}
+
+.sectionMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-ink-sub);
+  font-family: var(--font-latin);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+}
+
+.metaDivider {
+  color: var(--color-line);
+  font-size: 11px;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 25px;
+  border: 1px solid rgba(233, 225, 215, 0.3);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.stepNumber {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--color-surface-2);
+  color: var(--color-ink);
+  font-family: var(--font-latin);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: 0.28px;
+}
+
+.stepNumberLast {
+  background: var(--color-ink);
+  color: #fff;
+}
+
+.stepBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.stepHeading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stepTime {
+  color: var(--color-green);
+  font-family: var(--font-latin);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.stepTitle {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 26px;
+  letter-spacing: -0.09px;
+}
+
+.stepDesc {
+  margin: 0;
+  color: var(--color-ink-sub);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.tag {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.tagSand {
+  background: var(--color-surface);
+  color: var(--color-ink-sub);
+}
+
+.tagMint {
+  background: var(--color-mint-bg);
+  color: var(--color-mint-ink);
+}
+
+.routeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 25px;
+  border: 1px solid rgba(233, 225, 215, 0.3);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.routeHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.routeTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-ink);
+  font-size: 18px;
+  line-height: 26px;
+  letter-spacing: -0.09px;
+}
+
+.routeArea {
+  color: var(--color-ink-sub);
+  font-family: var(--font-latin);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.routeMap {
+  position: relative;
+  height: 176px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.routeMap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 시안의 지도 위 어두운 필터. 경로 칩의 대비를 확보한다. */
+.routeOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(49, 25, 8, 0.2);
+}
+
+.routePath {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: rgba(255, 248, 241, 0.9);
+  backdrop-filter: blur(6px);
+  color: var(--color-ink);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+  box-shadow: var(--shadow-sm);
+}
+
+.saveBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 24px;
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.saveText {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.saveText p {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.saveTitle {
+  color: var(--color-ink);
+}
+
+.saveDesc {
+  color: var(--color-ink-sub);
+}
+
+.saveActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.saveButton,
+.kakaoButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  font-size: 16px;
+  line-height: 24px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.saveButton {
+  padding: 11px 17px;
+  border: 1px solid rgba(233, 225, 215, 0.4);
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+
+.kakaoButton {
+  padding: 10px 16px;
+  border: 0;
+  background: #fee500;
+  color: #191919;
+}
+
+.saveButton:hover,
+.kakaoButton:hover {
+  filter: brightness(1.05);
+}
+
+@media (max-width: 960px) {
+  .topInner {
+    padding: 16px 24px;
+  }
+
+  .title {
+    font-size: 28px;
+    line-height: 38px;
+  }
+}

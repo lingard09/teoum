@@ -77,6 +77,35 @@ import bookingLock from './booking-lock.svg'
 import bookingInfo from './booking-info.svg'
 import bookingChevronToggle from './booking-chevron-toggle.svg'
 import bookingAward from './booking-award.svg'
+import planPin from './plan-pin.svg'
+import planCalendar from './plan-calendar.svg'
+import planMood from './plan-mood.svg'
+import planRefresh from './plan-refresh.svg'
+import planWeather from './plan-weather.svg'
+import planWalk from './plan-walk.svg'
+import planMap from './plan-map.svg'
+import planBookmark from './plan-bookmark.svg'
+import planSave from './plan-save.svg'
+import planKakao from './plan-kakao.svg'
+import courseStar from './course-star.svg'
+import courseRoute from './course-route.svg'
+import courseStep from './course-step.svg'
+import courseArrow from './course-arrow.svg'
+import courseBookmark from './course-bookmark.svg'
+import courseLink from './course-link.svg'
+import courseWalk from './course-walk.svg'
+import courseCar from './course-car.svg'
+import courseSubway from './course-subway.svg'
+import courseTrain from './course-train.svg'
+import courseNight from './course-night.svg'
+import courseSound from './course-sound.svg'
+import planFilter from './plan-filter.svg'
+import planPeople from './plan-people.svg'
+import planChevron from './plan-chevron.svg'
+import planDays from './plan-days.svg'
+import planRegion from './plan-region.svg'
+import planTransport from './plan-transport.svg'
+import planSparkle from './plan-sparkle.svg'
 
 export const icons = {
   badge: { src: badge, width: 14.667, height: 14 },
@@ -157,4 +186,35 @@ export const icons = {
   bookingInfo: { src: bookingInfo, width: 13.333, height: 13.333 },
   bookingChevronToggle: { src: bookingChevronToggle, width: 7, height: 4.317 },
   bookingAward: { src: bookingAward, width: 16, height: 21 },
+  // AI 여정 플래너 (피그마 1:553). 크기는 시안 원본 px.
+  planPin: { src: planPin, width: 12, height: 15 },
+  planCalendar: { src: planCalendar, width: 13.5, height: 15 },
+  planMood: { src: planMood, width: 15, height: 15 },
+  planRefresh: { src: planRefresh, width: 12, height: 12 },
+  planWeather: { src: planWeather, width: 14.667, height: 14.667 },
+  planWalk: { src: planWalk, width: 8.667, height: 14.333 },
+  planMap: { src: planMap, width: 15, height: 15 },
+  planBookmark: { src: planBookmark, width: 17.775, height: 18.375 },
+  planSave: { src: planSave, width: 10.5, height: 13.5 },
+  planKakao: { src: planKakao, width: 15, height: 15 },
+  // AI 코스 큐레이션 목록 (피그마 108:6566). 크기는 시안 원본 px.
+  courseStar: { src: courseStar, width: 13.333, height: 12.667 },
+  courseRoute: { src: courseRoute, width: 9, height: 10 },
+  courseStep: { src: courseStep, width: 20, height: 20 },
+  courseArrow: { src: courseArrow, width: 9.333, height: 9.333 },
+  courseBookmark: { src: courseBookmark, width: 10.5, height: 13.5 },
+  courseLink: { src: courseLink, width: 7.102, height: 2.813 },
+  courseWalk: { src: courseWalk, width: 7.583, height: 12.542 },
+  courseCar: { src: courseCar, width: 10.5, height: 9.333 },
+  courseSubway: { src: courseSubway, width: 9.333, height: 11.083 },
+  courseTrain: { src: courseTrain, width: 9.333, height: 11.083 },
+  courseNight: { src: courseNight, width: 8.75, height: 11.667 },
+  courseSound: { src: courseSound, width: 7, height: 10.5 },
+  planFilter: { src: planFilter, width: 15, height: 15 },
+  planPeople: { src: planPeople, width: 11, height: 8 },
+  planChevron: { src: planChevron, width: 9, height: 5.55 },
+  planDays: { src: planDays, width: 9, height: 10 },
+  planRegion: { src: planRegion, width: 8, height: 10 },
+  planTransport: { src: planTransport, width: 6.5, height: 10.75 },
+  planSparkle: { src: planSparkle, width: 13.5, height: 13.5 },
 }

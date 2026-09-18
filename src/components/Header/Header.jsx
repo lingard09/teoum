@@ -9,7 +9,7 @@ import styles from './Header.module.css'
 const NAV_LINKS = [
   { label: '모아보기', to: '/' },
   { label: '체험하기', to: '/experiences' },
-  { label: '계획하기', to: '/mypage' },
+  { label: '계획하기', to: '/plan' },
   { label: '머무르기', to: '/stays' },
   { label: '둘러보기', to: '/map' },
 ]
@@ -58,8 +58,10 @@ function Header() {
           <span className={styles.divider} aria-hidden="true" />
 
           <button type="button" className={styles.userButton}>
+            <span className={styles.avatar}>
+              <img src={avatar} alt="" />
+            </span>
             <span>광숙이</span>
-            <img src={avatar} alt="" className={styles.avatar} />
           </button>
         </div>
       </div>

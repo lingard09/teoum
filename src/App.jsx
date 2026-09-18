@@ -9,6 +9,8 @@ import ScrapsTab from './pages/MyPage/ScrapsTab.jsx'
 import ExperiencesPage from './pages/Experiences/ExperiencesPage.jsx'
 import StaysPage from './pages/Stays/StaysPage.jsx'
 import BookingPage from './pages/Booking/BookingPage.jsx'
+import CoursesPage from './pages/Courses/CoursesPage.jsx'
+import PlannerPage from './pages/Planner/PlannerPage.jsx'
 
 // 홈/지도탐색 전용 레이아웃. 디자인 토큰과 전역 리셋을 .hanok-app 스코프
 // 안에서만 적용해서(styles/tokens.css, styles/global.css 참고) /mypage쪽
@@ -33,6 +35,8 @@ function App() {
       <Route path="/experiences" element={<ExperiencesPage />} />
       <Route path="/stays" element={<StaysPage />} />
       <Route path="/stays/reserve" element={<BookingPage />} />
+      <Route path="/plan" element={<CoursesPage />} />
+      <Route path="/plan/result" element={<PlannerPage />} />
 
       <Route path="/mypage" element={<MyPage />}>
         <Route index element={<Navigate to="upcoming" replace />} />

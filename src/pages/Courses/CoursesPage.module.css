@@ -1,0 +1,508 @@
+/* AI 맞춤 여행 코스 큐레이션 탐색 목록 (피그마 108:6566). */
+.page {
+  background: var(--color-bg);
+}
+
+/* ---------------------------------------------------------------- 히어로 */
+.hero {
+  position: relative;
+  padding: 72px 80px;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+/* 시안의 은은한 한지 패턴 글로우. */
+.heroGlow {
+  position: absolute;
+  top: -96px;
+  right: -96px;
+  width: 384px;
+  height: 384px;
+  border-radius: 12px;
+  background: rgba(49, 25, 8, 0.05);
+  filter: blur(32px);
+}
+
+.heroInner {
+  position: relative;
+  max-width: 1360px;
+  margin: 0 auto;
+}
+
+.heroTop {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.heroText {
+  min-width: 0;
+}
+
+.headline {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 56px;
+  font-weight: 400;
+  line-height: 72px;
+  letter-spacing: -1.12px;
+}
+
+/* 시안은 각 줄을 줄바꿈 없이 흘린다. 좁은 화면에서만 줄바꿈을 허용한다. */
+.headline span {
+  white-space: nowrap;
+}
+
+.headlineAccent {
+  color: var(--color-green);
+}
+
+.heroDesc {
+  display: flex;
+  flex-direction: column;
+  max-width: 672px;
+  margin: 20px 0 0;
+  color: var(--color-ink-sub);
+  font-size: 17px;
+  line-height: 27.63px;
+}
+
+.metrics {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px 0 rgba(46, 29, 19, 0.06);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metricDivider {
+  position: absolute;
+  width: 1px;
+  height: 32px;
+  margin-left: -16px;
+  background: var(--color-line);
+}
+
+.metricLabel {
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+}
+
+.metricValue {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--color-ink);
+  font-size: 26px;
+  line-height: 36px;
+  letter-spacing: -0.26px;
+}
+
+.metricUnit {
+  color: var(--color-ink-sub);
+  font-size: 13px;
+  letter-spacing: 0.28px;
+}
+
+/* ------------------------------------------------------------ 필터 카드 */
+.filterCard {
+  margin-top: 40px;
+  padding: 24px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 16px rgba(46, 29, 19, 0.05);
+}
+
+.filterHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filterTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 20px;
+  letter-spacing: 0.28px;
+}
+
+.filterNote {
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fieldLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+}
+
+.selectWrap {
+  position: relative;
+  display: block;
+}
+
+.select {
+  width: 100%;
+  padding: 10px 36px 10px 16px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-count-ink);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 24px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.selectChevron {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.filterSubmit {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.generateButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 32px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 20px;
+  letter-spacing: 0.28px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+}
+
+.generateButton:hover {
+  filter: brightness(1.15);
+}
+
+/* ------------------------------------------------------------- 카탈로그 */
+.catalog {
+  padding: 48px 80px 56px;
+}
+
+.catalogInner {
+  max-width: 1360px;
+  margin: 0 auto;
+}
+
+.tabsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.categories {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.category {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink-sub);
+  font-size: 15px;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.categoryActive {
+  color: var(--color-ink);
+  font-weight: 900;
+}
+
+.categoryCount {
+  color: var(--color-ink-sub);
+  font-family: var(--font-latin);
+  font-size: 11px;
+  letter-spacing: 0.44px;
+}
+
+.sorts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sort {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-surface-2);
+  color: var(--color-ink-sub);
+  font-size: 12px;
+  line-height: 16px;
+  cursor: pointer;
+}
+
+.sortActive {
+  background: var(--color-surface-3);
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.empty {
+  margin: 0;
+  padding: 80px 0;
+  color: var(--color-ink-sub);
+  font-size: 16px;
+  text-align: center;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 36px;
+}
+
+.paginationTotal {
+  color: var(--color-ink-sub);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.pages {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pageNum,
+.pageArrow {
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--color-surface-2);
+  color: var(--color-ink-sub);
+  font-family: var(--font-latin);
+  font-size: 13px;
+}
+
+.pageArrow {
+  cursor: pointer;
+}
+
+.pageNumActive {
+  background: var(--color-surface-3);
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------- CTA 배너 */
+.ctaSection {
+  padding: 0 80px 64px;
+  background: var(--color-surface);
+}
+
+.ctaBanner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 72px 24px;
+  border-radius: 8px;
+  background: var(--color-ink);
+  text-align: center;
+}
+
+.ctaTitle {
+  margin: 0;
+  color: #fff;
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 44px;
+}
+
+.ctaDesc {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.ctaButton {
+  margin-top: 12px;
+  padding: 14px 32px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ctaButton:hover {
+  filter: brightness(1.04);
+}
+
+.ctaNote {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+}
+
+/* ---------------------------------------------------------------- 안내 */
+.notice {
+  padding: 24px 80px 48px;
+  background: var(--color-surface);
+}
+
+.noticeInner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-line);
+}
+
+.noticeText {
+  max-width: 720px;
+}
+
+.noticeTitle {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.noticeSub {
+  margin: 4px 0 0;
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  line-height: 17px;
+}
+
+.noticeLinks {
+  display: flex;
+  gap: 16px;
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  text-decoration: underline;
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filterGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .hero,
+  .catalog,
+  .ctaSection,
+  .notice {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .headline {
+    font-size: 34px;
+    line-height: 46px;
+  }
+
+  .headline span {
+    white-space: normal;
+  }
+
+  .grid,
+  .filterGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
