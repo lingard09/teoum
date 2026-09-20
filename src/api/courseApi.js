@@ -12,6 +12,12 @@ import { callKorService, hasTourApiKey } from "./tourApiClient.js";
 const COURSE_CONTENT_TYPE = "25";
 export const COURSE_LIST_LIMIT = 12;
 
+// 여행코스에는 "체험관광지" 같은 주제 분류가 없다(C0112~C0117은 가족/나홀로/힐링
+// 처럼 동행자 유형이다). 그래서 한옥·전통 쪽 코스만 모으려면 제목 키워드로
+// 걸러야 한다. 실호출로 확인한 건수: 전통 12, 문화유산 10, 민속 6, 선비 3,
+// 한옥 2, 고택 2 — 중복 제거하면 30여 건이다.
+const THEME_KEYWORDS = ["한옥", "고택", "전통", "민속", "선비", "문화유산"];
+
 function stripHtml(text) {
   return (text ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -36,24 +42,36 @@ function mapCourse(item) {
  * 여행코스 목록. 지역코드로 좁힐 수 있고, 없으면 전국에서 가져온다.
  * @returns {Promise<{source: 'tourapi'|'unavailable', courses: Array, totalCount: number}>}
  */
-export async function fetchCourses({ areaCode, limit = COURSE_LIST_LIMIT } = {}) {
+export async function fetchCourses({ keyword: only, limit = COURSE_LIST_LIMIT } = {}) {
   if (!hasTourApiKey()) return { source: "unavailable", courses: [], totalCount: 0 };
 
   try {
-    const params = {
-      contentTypeId: COURSE_CONTENT_TYPE,
-      numOfRows: String(limit * 2), // 사진 없는 항목을 걸러내고도 limit을 채우도록 넉넉히
-      arrange: "O", // 대표이미지 있는 항목 우선
-    };
-    if (areaCode) params.areaCode = areaCode;
+    const keywords = only ? [only] : THEME_KEYWORDS;
+    const results = await Promise.all(
+      keywords.map((keyword) =>
+        callKorService("searchKeyword2", {
+          keyword,
+          contentTypeId: COURSE_CONTENT_TYPE,
+          numOfRows: "30",
+        }).catch(() => ({ items: [] })),
+      ),
+    );
 
-    const { items, totalCount } = await callKorService("areaBasedList2", params);
-    const courses = items
-      .filter((item) => item.firstimage || item.firstimage2)
-      .slice(0, limit)
-      .map(mapCourse);
+    // 여행코스는 대표이미지가 거의 없다(한옥·전통 주제는 전부 없음). 실호출로
+    // 확인: searchKeyword2는 firstimage를 아예 안 주고, areaBasedList2도 해당
+    // 코스들은 비어 있다. 그래서 이미지로 거르지 않고, 카드에서 경유지 첫 사진을
+    // 썸네일로 가져다 쓴다(fetchCourseThumbnail).
+    const byId = new Map();
+    for (const { items } of results) {
+      for (const item of items) {
+        if (!byId.has(item.contentid)) byId.set(item.contentid, mapCourse(item));
+      }
+    }
 
-    return { source: "tourapi", courses, totalCount };
+    // 키워드 결과가 겹쳐서 API 총건수를 더하면 중복이 섞인다.
+    // 중복 제거 후 실제로 모인 코스 수를 그대로 쓴다.
+    const collected = [...byId.values()];
+    return { source: "tourapi", courses: collected.slice(0, limit), totalCount: collected.length };
   } catch (err) {
     console.warn("[courseApi] 여행코스 목록 조회 실패", err);
     return { source: "unavailable", courses: [], totalCount: 0 };
@@ -116,18 +134,36 @@ export async function fetchCourseDetail(contentId) {
   }
 }
 
-/** 지역 필터용. TourAPI areaCode 체계(관광정보 서비스 기준). */
-export const AREA_OPTIONS = [
-  { code: "", label: "전국" },
-  { code: "1", label: "서울" },
-  { code: "6", label: "부산" },
-  { code: "31", label: "경기" },
-  { code: "32", label: "강원" },
-  { code: "33", label: "충북" },
-  { code: "34", label: "충남" },
-  { code: "35", label: "경북" },
-  { code: "36", label: "경남" },
-  { code: "37", label: "전북" },
-  { code: "38", label: "전남" },
-  { code: "39", label: "제주" },
+
+const thumbnailCache = new Map();
+
+/**
+ * 목록 카드용 썸네일. 코스 자체에는 대표이미지가 없어서 첫 경유지 사진을 쓴다.
+ * 목록에서 카드마다 부르므로 detailInfo2 한 번만 호출한다(상세 화면의
+ * fetchCourseDetail은 intro/info/common 3번을 부르므로 목록에서는 쓰지 않는다).
+ */
+export async function fetchCourseThumbnail(contentId) {
+  if (thumbnailCache.has(contentId)) return thumbnailCache.get(contentId);
+
+  try {
+    const { items } = await callKorService("detailInfo2", {
+      contentId,
+      contentTypeId: COURSE_CONTENT_TYPE,
+      numOfRows: "5",
+    });
+    const image = items.find((item) => item.subdetailimg)?.subdetailimg ?? null;
+    thumbnailCache.set(contentId, image);
+    return image;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 주제 필터. 여행코스에는 지역 정보가 없어서(areacode/addr1이 비어 있고
+ * areaCode 파라미터로 거르면 0건) 지역 대신 주제 키워드로 나눈다.
+ */
+export const THEME_OPTIONS = [
+  { keyword: "", label: "전체" },
+  ...THEME_KEYWORDS.map((keyword) => ({ keyword, label: keyword })),
 ];
