@@ -5,6 +5,8 @@ import Footer from '../../components/Footer/Footer.jsx'
 import Icon from '../../components/Icon/Icon.jsx'
 import { icons } from '../../assets/icons/index.js'
 import { THEME_OPTIONS, fetchCourses } from '../../api/courseApi.js'
+import { generateAiPlan } from '../../api/aiPlanApi.js'
+import AiPlanResult from './AiPlanResult.jsx'
 import { cx } from '../../utils/cx.js'
 import ApiCourseCard from './ApiCourseCard.jsx'
 import styles from './CoursesPage.module.css'
@@ -13,6 +15,17 @@ import styles from './CoursesPage.module.css'
  * 여행코스 목록. 전부 TourAPI 여행코스(contentTypeId=25) 실데이터다.
  * 지역 필터는 API의 areaCode 파라미터로 서버에서 걸러온다.
  */
+const AI_FIELDS = [
+  { key: 'party', label: '동행자', options: ['2인', '혼자', '3~4인', '가족 (아이 동반)'] },
+  { key: 'duration', label: '기간', options: ['1박 2일', '당일치기', '2박 3일'] },
+  {
+    key: 'transport',
+    label: '이동 수단',
+    options: ['뚜벅이 도보 & 대중교통', '자가용', '기차 + 도보'],
+  },
+  { key: 'region', label: '지역', options: ['', '서울', '전주', '안동', '경주', '강릉', '담양'] },
+]
+
 function CoursesPage() {
   // 지도 팝업의 "여정 생성"이 ?q=안동 처럼 지역어를 넘겨준다.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -25,6 +38,23 @@ function CoursesPage() {
   // 이펙트 안에서 로딩 상태를 따로 세팅하지 않아도 지역을 바꾼 직후 이전
   // 목록이 남지 않는다.
   const [result, setResult] = useState(null)
+
+  // AI 맞춤 코스 생성 상태. 장소는 TourAPI 후보에서만 고르도록 서버가 강제한다.
+  const [conditions, setConditions] = useState({
+    party: '2인',
+    duration: '1박 2일',
+    transport: '뚜벅이 도보 & 대중교통',
+    region: '',
+  })
+  const [aiState, setAiState] = useState({ status: 'idle' })
+
+  const setCondition = (key, value) => setConditions((prev) => ({ ...prev, [key]: value }))
+
+  async function handleGenerate() {
+    setAiState({ status: 'loading' })
+    const res = await generateAiPlan(conditions)
+    setAiState(res.ok ? { status: 'ready', plan: res.plan } : { status: 'failed', message: res.message })
+  }
   const state =
     result && result.theme === activeKeyword ? result : { status: 'loading', courses: [], totalCount: 0 }
 
@@ -95,6 +125,35 @@ function CoursesPage() {
                 </p>
               )}
 
+              <div className={styles.aiRow}>
+                {AI_FIELDS.map((field) => (
+                  <label key={field.key} className={styles.aiField}>
+                    <span className={styles.aiLabel}>{field.label}</span>
+                    <select
+                      className={styles.aiSelect}
+                      value={conditions[field.key]}
+                      onChange={(e) => setCondition(field.key, e.target.value)}
+                    >
+                      {field.options.map((option) => (
+                        <option key={option || 'any'} value={option}>
+                          {option || '전국'}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+
+                <button
+                  type="button"
+                  className={styles.generateButton}
+                  onClick={handleGenerate}
+                  disabled={aiState.status === 'loading'}
+                >
+                  <Icon {...icons.planSparkle} />
+                  {aiState.status === 'loading' ? 'AI가 코스를 짜는 중…' : '나만의 AI 여정 생성하기'}
+                </button>
+              </div>
+
               <div className={styles.areaRow}>
                 {THEME_OPTIONS.map((option) => (
                   <button
@@ -113,6 +172,10 @@ function CoursesPage() {
             </div>
           </div>
         </section>
+
+        {aiState.status !== 'idle' && (
+          <AiPlanResult state={aiState} onRetry={handleGenerate} />
+        )}
 
         <section className={styles.catalog}>
           <div className={styles.catalogInner}>

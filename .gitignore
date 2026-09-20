@@ -36,3 +36,6 @@ photo/
 
 # Firebase CLI 배포 캐시
 .firebase/
+
+# Cloudflare Pages Functions 로컬 개발용 비밀값
+.dev.vars

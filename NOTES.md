@@ -80,6 +80,17 @@
 - API 목록은 12개씩만 노출한다. 카드마다 상세를 부르기 때문에 목록이 길수록
   호출 수가 배로 늘어 공공데이터포털 일일 트래픽을 빠르게 소진한다.
 
+## AI 맞춤 코스 (계획하기)
+- `functions/api/plan.js` — Cloudflare Pages Function. 브라우저가 TourAPI에서 모은
+  장소 후보를 받아 OpenAI에 "이 목록 안에서만 골라 순서·이유를 쓰라"고 요청한다.
+- **LLM이 장소를 지어내지 못하게 하는 것이 설계의 핵심이다.** 응답에 후보에 없는
+  contentId가 섞여 오면 서버에서 걸러낸다. 화면에는 TourAPI에 실재하는 곳만 남는다.
+- `OPENAI_API_KEY`는 Cloudflare 환경변수(운영)와 `.dev.vars`(로컬)에만 둔다.
+  브라우저 번들에 들어가지 않는다. 등록:
+  `npx wrangler pages secret put OPENAI_API_KEY --project-name teoum`
+- 키가 없으면 생성 버튼이 실패 안내를 띄운다(빈 화면이 되지 않는다).
+- `vite dev`에는 Functions가 없어서 로컬 확인은 `npx wrangler pages dev`가 필요하다.
+
 ## 배포
 - **Cloudflare Pages** — https://teoum.pages.dev (저장소 연결, main 푸시 시 자동 빌드)
   - 빌드 설정: Build command `npm run build`, Output directory `dist`

@@ -637,3 +637,208 @@
   font-size: 12px;
   cursor: pointer;
 }
+
+/* ------------------------------------------------------- AI 맞춤 코스 */
+.aiRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.aiField {
+  display: flex;
+  flex: 1 1 140px;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.aiLabel {
+  color: var(--color-ink-sub);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.44px;
+}
+
+.aiSelect {
+  width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-count-ink);
+  font-family: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.generateButton:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.aiResult {
+  padding: 0 80px 48px;
+  background: var(--color-surface);
+}
+
+.aiResultInner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px 0 rgba(46, 29, 19, 0.06);
+}
+
+.aiNotice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0;
+  padding: 32px 0;
+  color: var(--color-ink-sub);
+  font-size: 15px;
+}
+
+.aiResultHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.aiResultTitle {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 36px;
+}
+
+.aiResultDesc {
+  margin: 6px 0 0;
+  color: var(--color-ink-sub);
+  font-size: 15px;
+  line-height: 24px;
+}
+
+/* AI가 장소를 지어내지 않았음을 밝히는 표시. */
+.aiResultBadge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--color-mint-bg);
+  color: var(--color-mint-ink);
+  font-size: 11px;
+  letter-spacing: 0.44px;
+  white-space: nowrap;
+}
+
+.aiStops {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.aiStop {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--color-bg);
+}
+
+.aiStopNumber {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: var(--color-surface-2);
+  color: var(--color-ink);
+  font-family: var(--font-latin);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.aiStopImage {
+  flex-shrink: 0;
+  width: 92px;
+  height: 64px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.aiStopBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.aiStopHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.aiStopTime {
+  color: var(--color-green);
+  font-family: var(--font-latin);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.aiStopName {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.aiStopAddress {
+  margin: 2px 0 0;
+  color: var(--color-ink-sub);
+  font-size: 12px;
+}
+
+.aiStopReason {
+  margin: 4px 0 0;
+  color: var(--color-ink-sub);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.aiStopLink {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .aiResult {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .aiStopImage {
+    display: none;
+  }
+}
