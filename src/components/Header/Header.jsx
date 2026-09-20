@@ -57,12 +57,12 @@ function Header() {
 
           <span className={styles.divider} aria-hidden="true" />
 
-          <button type="button" className={styles.userButton}>
+          <NavLink to="/mypage" className={styles.userButton}>
             <span className={styles.avatar}>
               <img src={avatar} alt="" />
             </span>
             <span>광숙이</span>
-          </button>
+          </NavLink>
         </div>
       </div>
     </header>

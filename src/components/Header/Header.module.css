@@ -149,6 +149,7 @@ a.navLink {
 }
 
 .userButton {
+  text-decoration: none;
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;

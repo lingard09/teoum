@@ -104,6 +104,7 @@
 }
 
 .name {
+  font-family: var(--font-display);
   color: var(--color-ink);
   font-size: 36px;
   font-weight: 700;

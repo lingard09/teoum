@@ -19,6 +19,9 @@
   --font-sans: 'Pretendard', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
   --font-latin: 'Plus Jakarta Sans', var(--font-sans);
   --font-serif: 'Noto Serif KR', serif;
+  /* 피그마 시안의 제목 서체(가평한석봉). tokens.css에도 --font-heading이 있지만
+     그건 .hanok-app 스코프 전용이라 CSS 모듈에서 참조할 수 없어 :root에 따로 둔다. */
+  --font-display: 'Gapyeong Hanseokbong', var(--font-serif);
 }
 
 *,

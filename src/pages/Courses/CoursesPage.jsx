@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import Header from '../../components/Header/Header.jsx'
 import Footer from '../../components/Footer/Footer.jsx'
 import Icon from '../../components/Icon/Icon.jsx'
@@ -13,20 +14,26 @@ import styles from './CoursesPage.module.css'
  * 지역 필터는 API의 areaCode 파라미터로 서버에서 걸러온다.
  */
 function CoursesPage() {
+  // 지도 팝업의 "여정 생성"이 ?q=안동 처럼 지역어를 넘겨준다.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const query = searchParams.get('q') ?? ''
+
   const [theme, setTheme] = useState('')
+  // 검색어가 있으면 그것이 우선이고, 주제 칩은 검색어를 지웠을 때만 쓰인다.
+  const activeKeyword = query || theme
   // 결과에 어느 지역의 응답인지 함께 담아두고 렌더할 때 대조한다.
   // 이펙트 안에서 로딩 상태를 따로 세팅하지 않아도 지역을 바꾼 직후 이전
   // 목록이 남지 않는다.
   const [result, setResult] = useState(null)
   const state =
-    result && result.theme === theme ? result : { status: 'loading', courses: [], totalCount: 0 }
+    result && result.theme === activeKeyword ? result : { status: 'loading', courses: [], totalCount: 0 }
 
   useEffect(() => {
     let alive = true
-    fetchCourses({ keyword: theme }).then(({ source, courses, totalCount }) => {
+    fetchCourses({ keyword: activeKeyword }).then(({ source, courses, totalCount }) => {
       if (!alive) return
       setResult({
-        theme,
+        theme: activeKeyword,
         status: source === 'tourapi' ? 'ready' : 'unavailable',
         courses,
         totalCount,
@@ -35,9 +42,9 @@ function CoursesPage() {
     return () => {
       alive = false
     }
-  }, [theme])
+  }, [activeKeyword])
 
-  const themeLabel = THEME_OPTIONS.find((t) => t.keyword === theme)?.label ?? '전체'
+  const themeLabel = query || (THEME_OPTIONS.find((t) => t.keyword === theme)?.label ?? '전체')
 
   return (
     <>
@@ -79,13 +86,25 @@ function CoursesPage() {
                 <span className={styles.filterNote}>한국관광공사 TourAPI 실시간 조회</span>
               </div>
 
+              {query && (
+                <p className={styles.searchNote}>
+                  <strong>{query}</strong> 검색 결과입니다.
+                  <button type="button" className={styles.clearSearch} onClick={() => setSearchParams({})}>
+                    검색 해제
+                  </button>
+                </p>
+              )}
+
               <div className={styles.areaRow}>
                 {THEME_OPTIONS.map((option) => (
                   <button
                     key={option.keyword || 'all'}
                     type="button"
-                    className={cx(styles.areaChip, theme === option.keyword && styles.areaChipActive)}
-                    onClick={() => setTheme(option.keyword)}
+                    className={cx(styles.areaChip, !query && theme === option.keyword && styles.areaChipActive)}
+                    onClick={() => {
+                      setTheme(option.keyword)
+                      if (query) setSearchParams({})
+                    }}
                   >
                     {option.label}
                   </button>

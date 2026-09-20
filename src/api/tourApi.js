@@ -66,14 +66,9 @@ export async function fetchNearbyAttractions({
  * overview(소개글), 대표이미지, 주소, 좌표 등을 포함.
  */
 export async function fetchAttractionDetail(contentId) {
-  const { items } = await callKorService("detailCommon2", {
-    contentId,
-    defaultYN: "Y",
-    firstImageYN: "Y",
-    addrinfoYN: "Y",
-    mapinfoYN: "Y",
-    overviewYN: "Y",
-  });
+  // ...YN 부가 옵션을 함께 보내면 INVALID_REQUEST_PARAMETER_ERROR(defaultYN)가 난다
+  // (실호출로 확인). contentId만 보내도 overview·homepage를 포함한 전체 필드가 온다.
+  const { items } = await callKorService("detailCommon2", { contentId });
   const item = items[0];
   if (!item) return null;
   return {

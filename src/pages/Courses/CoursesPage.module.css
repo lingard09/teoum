@@ -614,3 +614,26 @@
   height: 100%;
   background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-3) 100%);
 }
+
+.searchNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0;
+  color: var(--color-ink-sub);
+  font-size: 13px;
+}
+
+.searchNote strong {
+  color: var(--color-ink);
+}
+
+.clearSearch {
+  padding: 4px 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-ink-sub);
+  font-size: 12px;
+  cursor: pointer;
+}
