@@ -106,10 +106,6 @@ function ExperienceDetailPage() {
                   </dl>
                 )}
 
-                <Link to={`/stays/reserve?contentId=${detail.contentId}`} className={styles.reserve}>
-                  예약 진행하기
-                </Link>
-
                 {detail.homepage && (
                   <a
                     className={styles.homepage}

@@ -89,17 +89,10 @@ function ApiExperienceCard({ experience }) {
           <span className={styles.apiTel}>{detail?.tel || experience.tel || '문의처 없음'}</span>
         </div>
 
-        <div className={styles.apiActions}>
-          <Link to={`/experiences/${experience.contentId}`} className={styles.apiDetailButton}>
-            상세보기
-          </Link>
-          <Link
-            to={`/stays/reserve?contentId=${experience.contentId}`}
-            className={styles.apiReserveButton}
-          >
-            예약 진행하기
-          </Link>
-        </div>
+        {/* 체험은 예약·결제를 다루지 않는다. 상세정보로만 이어진다. */}
+        <Link to={`/experiences/${experience.contentId}`} className={styles.apiDetailButton}>
+          상세정보 보기
+        </Link>
       </div>
     </article>
   )
