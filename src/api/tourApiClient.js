@@ -49,6 +49,10 @@ function normalizeItems(items) {
   return Array.isArray(item) ? item : [item];
 }
 
+// data.go.kr은 Referer 헤더에 쿼리스트링이 붙어 있으면 그 값까지 요청 파라미터로
+// 해석해서 INVALID_REQUEST_PARAMETER_ERROR(400)를 돌려준다(실호출로 확인:
+// Referer 없음/Origin만/쿼리 없는 Referer는 200, "?contentId=..."가 붙으면 400).
+// 예약 페이지처럼 URL에 쿼리가 있는 화면에서 API가 통째로 실패하므로 Referer를 보내지 않는다.
 async function requestTourApi(baseUrl, operation, params = {}) {
   if (!hasTourApiKey()) {
     throw new TourApiError("VITE_TOUR_API_KEY가 설정되지 않았습니다.", {
@@ -68,7 +72,7 @@ async function requestTourApi(baseUrl, operation, params = {}) {
   });
 
   const url = `${baseUrl}/${operation}?${query.toString()}`;
-  const res = await fetch(url);
+  const res = await fetch(url, { referrerPolicy: "no-referrer" });
 
   if (!res.ok) {
     throw new TourApiError(`TourAPI 요청 실패 (HTTP ${res.status})`, {

@@ -85,7 +85,7 @@ function ApiStayCard({ stay, saved, onToggleSave }) {
             <span className={styles.priceLabel}>문의</span>
             <span className={styles.apiTel}>{detail?.tel || stay.tel || '정보 없음'}</span>
           </div>
-          <Link to="/stays/reserve" className={styles.reserveButton}>
+          <Link to={`/stays/reserve?contentId=${stay.contentId}`} className={styles.reserveButton}>
             예약 일정 확인
           </Link>
         </div>

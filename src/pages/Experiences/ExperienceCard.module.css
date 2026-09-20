@@ -193,3 +193,21 @@
   font-size: 14px;
   font-weight: 600;
 }
+
+.apiReserveButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  margin-top: 12px;
+  border-radius: 4px;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.apiReserveButton:hover {
+  filter: brightness(1.15);
+}

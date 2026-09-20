@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Icon from '../../components/Icon/Icon.jsx'
 import { icons } from '../../assets/icons/index.js'
 import { fetchExperienceDetail, fetchExperienceOverview } from '../../api/experienceApi.js'
@@ -87,6 +88,13 @@ function ApiExperienceCard({ experience }) {
           </span>
           <span className={styles.apiTel}>{detail?.tel || experience.tel || '문의처 없음'}</span>
         </div>
+
+        <Link
+          to={`/stays/reserve?contentId=${experience.contentId}`}
+          className={styles.apiReserveButton}
+        >
+          예약 진행하기
+        </Link>
       </div>
     </article>
   )

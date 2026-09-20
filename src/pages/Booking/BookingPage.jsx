@@ -1,10 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import Header from '../../components/Header/Header.jsx'
 import Footer from '../../components/Footer/Footer.jsx'
 import Icon from '../../components/Icon/Icon.jsx'
 import { icons } from '../../assets/icons/index.js'
 import { cx } from '../../utils/cx.js'
-import { fetchExperienceDetail, stripOverviewHtml, toHttpsUrl } from '../../api/tourApiDetail.js'
+import {
+  contentTypeLabel,
+  fetchBookingInfo,
+  fetchDetailCommon,
+  fetchExperienceDetail,
+  stripOverviewHtml,
+  toHttpsUrl,
+} from '../../api/tourApiDetail.js'
 import {
   steps,
   experienceSummary,
@@ -21,9 +29,13 @@ import BookingCalendar from './BookingCalendar.jsx'
 import styles from './BookingPage.module.css'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
-// 체험이 위치한 실제 지역(북촌한옥마을)을 키워드로 TourAPI에서 관광정보를 가져와
-// 요약 카드의 이미지/주소/소개글을 채운다. mock 목업 문구는 그대로 fallback으로 둔다.
-const TOUR_API_KEYWORD = '북촌한옥마을'
+// 결제 대상은 목록(체험하기/머무르기)에서 누른 실제 항목이다. 카드가 넘겨준
+// contentId로 TourAPI 상세를 조회해 이름·사진·주소·소개글을 채운다.
+//
+// 주소로 직접 들어온 경우처럼 contentId가 없으면 아래 키워드로 대표 장소 하나를
+// 보여준다. 요금·정원·환불규정은 TourAPI에 없는 값이라 booking.js의 시나리오
+// 데이터를 그대로 쓴다(실제 결제 연동이 아닌 데모 플로우).
+const FALLBACK_KEYWORD = '북촌한옥마을'
 
 function formatDateLabel(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number)
@@ -32,6 +44,9 @@ function formatDateLabel(dateStr) {
 }
 
 function BookingPage() {
+  const [searchParams] = useSearchParams()
+  const contentId = searchParams.get('contentId')
+
   const [selectedDate, setSelectedDate] = useState(step1.defaultSelectedDate)
   const [selectedSlotId, setSelectedSlotId] = useState(step1.defaultSlotId)
   const [counts, setCounts] = useState(() =>
@@ -51,17 +66,27 @@ function BookingPage() {
     async function loadTourInfo() {
       setTourStatus('loading')
       try {
-        const detail = await fetchExperienceDetail(TOUR_API_KEYWORD)
+        // contentId가 있으면 그 항목을 그대로 조회하고, 없으면 대표 장소로 대체한다.
+        const detail = contentId
+          ? await fetchDetailCommon(contentId)
+          : await fetchExperienceDetail(FALLBACK_KEYWORD)
         if (cancelled) return
-        if (!detail) {
+        if (!detail?.title) {
           setTourStatus('fallback')
           return
         }
+        // 요약 배지는 항목 종류에 따라 다른 필드를 쓴다(숙소=체크인/객실,
+        // 체험=이용시간/휴무/프로그램). TourAPI에 없는 값은 넣지 않는다.
+        const info = await fetchBookingInfo(detail.contentid, detail.contenttypeid)
+        if (cancelled) return
+
         setTourInfo({
           title: detail.title,
           address: [detail.addr1, detail.addr2].filter(Boolean).join(' '),
           image: toHttpsUrl(detail.firstimage),
           overview: stripOverviewHtml(detail.overview),
+          typeLabel: contentTypeLabel(detail.contenttypeid),
+          info,
         })
         setTourStatus('live')
       } catch (err) {
@@ -75,7 +100,7 @@ function BookingPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [contentId])
 
   function changeCount(id, delta) {
     setCounts((prev) => ({ ...prev, [id]: Math.max(0, prev[id] + delta) }))
@@ -120,19 +145,23 @@ function BookingPage() {
                   <img src={displaySummary.image} alt="" />
                   <span className={styles.summaryBadge}>
                     <Icon {...experienceSummary.badge.icon} />
-                    {experienceSummary.badge.label}
+                    {tourInfo?.typeLabel ?? experienceSummary.badge.label}
                   </span>
                 </div>
                 <div className={styles.summaryBody}>
                   <div className={styles.summaryTop}>
                     <span className={cx(styles.tourStatus, styles[`tourStatus_${tourStatus}`])}>
                       {tourStatus === 'loading' && '실시간 관광정보 불러오는 중…'}
-                      {tourStatus === 'live' && `TourAPI 실시간 연동 · ${TOUR_API_KEYWORD}`}
+                      {tourStatus === 'live' && `TourAPI 실시간 연동 · ${displaySummary.title[0]}`}
                       {tourStatus === 'fallback' && 'TourAPI 연동 실패 · 예시 정보 표시 중'}
                     </span>
                     <div className={styles.summaryTags}>
                       <span className={cx(styles.summaryTag, styles.sand)}>{displaySummary.address}</span>
-                      <span className={cx(styles.summaryTag, styles.mint)}>{experienceSummary.tags[1]?.label}</span>
+                      {!tourInfo && (
+                        <span className={cx(styles.summaryTag, styles.mint)}>
+                          {experienceSummary.tags[1]?.label}
+                        </span>
+                      )}
                     </div>
                     <h1 className={styles.summaryTitle}>
                       {displaySummary.title.map((line, i) => (
@@ -146,7 +175,13 @@ function BookingPage() {
                     </p>
                   </div>
                   <div className={styles.summaryInfoRow}>
-                    {experienceSummary.info.map((item) => (
+                    {tourInfo?.info?.length
+                      ? tourInfo.info.map((label) => (
+                          <span key={label} className={styles.summaryInfoItem}>
+                            {label}
+                          </span>
+                        ))
+                      : experienceSummary.info.map((item) => (
                       <span key={item.label} className={styles.summaryInfoItem}>
                         <Icon {...item.icon} />
                         {item.label}

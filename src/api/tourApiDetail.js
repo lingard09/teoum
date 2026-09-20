@@ -32,6 +32,10 @@ function buildUrl(operation, params) {
   return `${BASE_URL}/${operation}?${query.toString()}`
 }
 
+// data.go.kr은 Referer 헤더에 쿼리스트링이 붙어 있으면 그 값까지 요청 파라미터로
+// 해석해서 INVALID_REQUEST_PARAMETER_ERROR(400)를 돌려준다(실호출로 확인:
+// Referer 없음/Origin만/쿼리 없는 Referer는 200, "?contentId=..."가 붙으면 400).
+// 예약 페이지처럼 URL에 쿼리가 있는 화면에서 API가 통째로 실패하므로 Referer를 보내지 않는다.
 async function callTourApi(operation, params) {
   if (!SERVICE_KEY) {
     throw new Error('TourAPI 서비스키가 설정되지 않았습니다. .env의 VITE_TOUR_API_KEY를 확인하세요.')
@@ -42,7 +46,10 @@ async function callTourApi(operation, params) {
 
   let res
   try {
-    res = await fetch(buildUrl(operation, params), { signal: controller.signal })
+    res = await fetch(buildUrl(operation, params), {
+      signal: controller.signal,
+      referrerPolicy: 'no-referrer',
+    })
   } finally {
     clearTimeout(timeout)
   }
@@ -110,4 +117,52 @@ export function stripOverviewHtml(overview) {
     .replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/g, ' ')
     .trim()
+}
+
+// 콘텐츠 타입별 표시 라벨. detailCommon2가 돌려주는 contenttypeid 기준.
+const CONTENT_TYPE_LABEL = {
+  '12': '전통체험',
+  '14': '문화시설',
+  '25': '여행코스',
+  '32': '한옥 스테이',
+  '39': '음식점',
+}
+
+export function contentTypeLabel(contentTypeId) {
+  return CONTENT_TYPE_LABEL[String(contentTypeId)] ?? 'TourAPI 등록 장소'
+}
+
+/**
+ * 예약 요약 카드에 넣을 실제 정보. 숙소(32)와 체험(12/14)이 서로 다른 필드를
+ * 쓰기 때문에 contentTypeId에 따라 detailIntro2에서 뽑는 값이 달라진다.
+ *
+ * TourAPI에 없는 값(요금·정원·환불규정)은 여기서 만들지 않는다.
+ */
+export async function fetchBookingInfo(contentId, contentTypeId) {
+  const type = String(contentTypeId)
+  try {
+    const [intro] = await callTourApi('detailIntro2', { contentId, contentTypeId: type })
+    if (!intro) return []
+
+    const clean = (v) => stripOverviewHtml(String(v ?? '')).split(/\s-\s|\n/)[0].trim()
+
+    if (type === '32') {
+      return [
+        intro.checkintime && `체크인 ${clean(intro.checkintime)}`,
+        intro.checkouttime && `퇴실 ${clean(intro.checkouttime)}`,
+        intro.roomcount && `객실 ${clean(intro.roomcount)}`,
+        intro.parkinglodging && `주차 ${clean(intro.parkinglodging)}`,
+      ].filter(Boolean)
+    }
+
+    return [
+      intro.usetime && `이용 ${clean(intro.usetime)}`,
+      intro.restdate && `휴무 ${clean(intro.restdate)}`,
+      intro.expguide && clean(intro.expguide.split('/')[0]),
+      intro.parking && `주차 ${clean(intro.parking)}`,
+    ].filter(Boolean)
+  } catch (err) {
+    console.warn('[tourApiDetail] 예약 요약 정보 조회 실패, 생략합니다.', err)
+    return []
+  }
 }
