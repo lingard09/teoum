@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../components/Header/Header.jsx'
 import Footer from '../../components/Footer/Footer.jsx'
 import Icon from '../../components/Icon/Icon.jsx'
@@ -25,6 +25,7 @@ import {
   cancellationPolicy,
   guaranteeNote,
 } from '../../data/booking.js'
+import { saveReservation } from '../../api/mypageApi.js'
 import BookingCalendar from './BookingCalendar.jsx'
 import styles from './BookingPage.module.css'
 
@@ -44,8 +45,10 @@ function formatDateLabel(dateStr) {
 }
 
 function BookingPage() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const contentId = searchParams.get('contentId')
+  const [saving, setSaving] = useState(false)
 
   const [selectedDate, setSelectedDate] = useState(step1.defaultSelectedDate)
   const [selectedSlotId, setSelectedSlotId] = useState(step1.defaultSlotId)
@@ -102,6 +105,29 @@ function BookingPage() {
     }
   }, [contentId])
 
+  // 실제 결제 연동은 없다. 고른 일정·인원과 TourAPI 장소 정보를 보관함에 담고
+  // 마이페이지의 "다가오는 여정"으로 보낸다.
+  async function handleConfirm() {
+    setSaving(true)
+    try {
+      await saveReservation({
+        contentId,
+        title: displaySummary.title[0],
+        location: displaySummary.address,
+        image: displaySummary.image,
+        typeLabel: tourInfo?.typeLabel ?? null,
+        dateLabel: formatDateLabel(selectedDate),
+        slotLabel: selectedSlot?.label ?? null,
+        peopleLabel: peopleSummary,
+        totalLabel: `${total.toLocaleString()}원`,
+      })
+      navigate('/mypage/upcoming')
+    } catch (err) {
+      console.warn('[BookingPage] 예약 저장 실패', err)
+      setSaving(false)
+    }
+  }
+
   function changeCount(id, delta) {
     setCounts((prev) => ({ ...prev, [id]: Math.max(0, prev[id] + delta) }))
   }
@@ -118,6 +144,14 @@ function BookingPage() {
     [counts],
   )
   const total = Math.max(0, subtotal - discount.amount)
+
+  const selectedSlot = step1.timeSlots.find((slot) => slot.id === selectedSlotId) ?? null
+  // "성인 2명 · 어린이 1명"처럼 사람이 읽는 인원 요약을 만든다.
+  const peopleSummary =
+    step2.participants
+      .filter((p) => counts[p.id] > 0)
+      .map((p) => `${p.label} ${counts[p.id]}명`)
+      .join(' · ') || null
   const adultCount = counts.adult ?? 0
 
   return (
@@ -402,9 +436,16 @@ function BookingPage() {
                   </div>
                 </div>
 
-                <button type="button" className={styles.ctaButton}>
+                <button
+                  type="button"
+                  className={styles.ctaButton}
+                  onClick={handleConfirm}
+                  disabled={saving}
+                >
                   <Icon {...icons.bookingLock} />
-                  {total.toLocaleString()}원 결제하고 예약 확정하기
+                  {saving
+                    ? '예약을 담는 중…'
+                    : `${total.toLocaleString()}원 결제하고 예약 확정하기`}
                 </button>
 
                 <div className={styles.policy}>

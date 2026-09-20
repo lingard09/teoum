@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import Header from '../../components/Header/Header.jsx'
 import Footer from '../../components/Footer/Footer.jsx'
 import { fetchExperiencePage } from '../../api/experienceApi.js'
+import { contentTypeLabel } from '../../api/tourApiDetail.js'
 import styles from './ExperienceDetailPage.module.css'
 
 /** 체험 상세. 모든 값이 TourAPI 실데이터이고, 없는 항목은 아예 그리지 않는다. */
@@ -54,7 +55,7 @@ function ExperienceDetailPage() {
               <div className={styles.heroBody}>
                 <div className={styles.badges}>
                   {detail.isHeritage && <span className={styles.badgeMint}>국가유산 지정</span>}
-                  <span className={styles.badge}>TourAPI 등록 체험</span>
+                  <span className={styles.badge}>{contentTypeLabel(detail.contentTypeId)}</span>
                 </div>
                 <h1 className={styles.title}>{detail.title}</h1>
                 {detail.address && <p className={styles.address}>{detail.address}</p>}

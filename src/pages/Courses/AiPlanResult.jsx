@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { saveAiCourse } from '../../api/mypageApi.js'
 import styles from './CoursesPage.module.css'
 
 /**
@@ -8,6 +10,20 @@ import styles from './CoursesPage.module.css'
  * contentId를 걸러내므로 지어낸 장소는 표시되지 않는다.
  */
 function AiPlanResult({ state, onRetry }) {
+  // 저장은 마이페이지의 "저장된 AI 여행 코스" 탭으로 들어간다.
+  const [saveState, setSaveState] = useState('idle')
+
+  async function handleSave() {
+    setSaveState('saving')
+    try {
+      await saveAiCourse(state.plan)
+      setSaveState('saved')
+    } catch (err) {
+      console.warn('[AiPlanResult] 코스 저장 실패', err)
+      setSaveState('failed')
+    }
+  }
+
   return (
     <section className={styles.aiResult} aria-label="AI 맞춤 코스">
       <div className={styles.aiResultInner}>
@@ -31,10 +47,31 @@ function AiPlanResult({ state, onRetry }) {
                 <h2 className={styles.aiResultTitle}>{state.plan.title}</h2>
                 {state.plan.summary && <p className={styles.aiResultDesc}>{state.plan.summary}</p>}
               </div>
-              <span className={styles.aiResultBadge}>
-                TourAPI 실제 장소 {state.plan.candidateCount}곳 중 선별
-              </span>
+              <div className={styles.aiResultActions}>
+                <span className={styles.aiResultBadge}>
+                  TourAPI 실제 장소 {state.plan.candidateCount}곳 중 선별
+                </span>
+
+                {saveState === 'saved' ? (
+                  <Link to="/mypage/courses" className={styles.aiSaveDone}>
+                    보관함에서 보기 →
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.aiSaveButton}
+                    onClick={handleSave}
+                    disabled={saveState === 'saving'}
+                  >
+                    {saveState === 'saving' ? '저장 중…' : '이 코스 저장'}
+                  </button>
+                )}
+              </div>
             </div>
+
+            {saveState === 'failed' && (
+              <p className={styles.aiSaveError}>코스를 저장하지 못했습니다. 다시 시도해 주세요.</p>
+            )}
 
             <ol className={styles.aiStops}>
               {state.plan.stops.map((stop, index) => (

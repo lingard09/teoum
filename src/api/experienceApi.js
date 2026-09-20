@@ -203,6 +203,7 @@ export async function fetchExperiencePage(contentId) {
 
     return {
       contentId,
+      contentTypeId: common.contenttypeid ?? null,
       title: common.title,
       overview: stripHtml(common.overview) || null,
       address: [common.addr1, common.addr2].filter(Boolean).join(" ") || null,

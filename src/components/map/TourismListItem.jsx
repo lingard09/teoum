@@ -1,4 +1,5 @@
 import CongestionBar from "./CongestionBar.jsx";
+import { kakaoDirectionsUrl, telUrl } from "../../utils/mapLinks.js";
 import "./TourismListItem.css";
 
 const TAG_ICONS = {
@@ -10,6 +11,7 @@ const TAG_ICONS = {
 
 function TourismListItem({ village, isActive, onSelect }) {
   const { name, mapImage, rating, reviewCount, tag, tagIcon, congestion, address } = village;
+  const tel = telUrl(village.tourApiTel);
 
   return (
     <li className={isActive ? "list-item is-active" : "list-item"}>
@@ -41,12 +43,20 @@ function TourismListItem({ village, isActive, onSelect }) {
         </div>
       </button>
       <div className="list-item__actions">
-        <button type="button" className="list-item__action-btn list-item__action-btn--outline">
-          문의하기
-        </button>
-        <button type="button" className="list-item__action-btn list-item__action-btn--solid" onClick={onSelect}>
+        {/* 전화번호가 없는 곳은 버튼을 숨긴다(있는 척하지 않는다). */}
+        {tel && (
+          <a href={tel} className="list-item__action-btn list-item__action-btn--outline">
+            문의하기
+          </a>
+        )}
+        <a
+          href={kakaoDirectionsUrl(village)}
+          target="_blank"
+          rel="noreferrer"
+          className="list-item__action-btn list-item__action-btn--solid"
+        >
           길찾기
-        </button>
+        </a>
       </div>
     </li>
   );

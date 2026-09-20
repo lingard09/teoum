@@ -842,3 +842,42 @@
     display: none;
   }
 }
+
+.aiResultActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.aiSaveButton {
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.aiSaveButton:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.aiSaveDone {
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--color-mint-bg);
+  color: var(--color-mint-ink);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.aiSaveError {
+  margin: 12px 0 0;
+  color: #c0392b;
+  font-size: 13px;
+}

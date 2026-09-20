@@ -127,3 +127,30 @@
   font-weight: 700;
   line-height: 24px;
 }
+
+/* 실제 활동 개수. 등급·스탬프 같은 허구 지표를 대신한다. */
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 12px 0 0;
+}
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.stat dt {
+  color: var(--color-ink-sub);
+  font-size: 13px;
+}
+
+.stat dd {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-latin);
+  font-size: 20px;
+  font-weight: 700;
+}

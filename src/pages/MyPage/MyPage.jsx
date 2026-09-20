@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { loadMyPage, removeScrap } from '../../api/mypageApi.js'
+import { loadMyPage, removeCourse, removeReservation, removeScrap } from '../../api/mypageApi.js'
 import { cx } from '../../utils/cx.js'
 import Header from '../../components/Header/Header.jsx'
 import Footer from '../../components/Footer/Footer.jsx'
@@ -17,6 +17,30 @@ function MyPage() {
     })
     return () => {
       alive = false
+    }
+  }, [])
+
+  // 코스 삭제도 스크랩과 같은 방식(먼저 지우고 실패하면 다시 읽기)으로 처리한다.
+const cancelReservation = useCallback(async (reservationId) => {
+    setData((prev) => ({
+      ...prev,
+      reservations: prev.reservations.filter((r) => r.id !== reservationId),
+    }))
+    try {
+      await removeReservation(reservationId)
+    } catch (err) {
+      console.warn('[MyPage] 예약 취소 실패, 목록을 다시 불러옵니다.', err)
+      setData(await loadMyPage())
+    }
+  }, [])
+
+    const dropCourse = useCallback(async (courseId) => {
+    setData((prev) => ({ ...prev, courses: prev.courses.filter((c) => c.id !== courseId) }))
+    try {
+      await removeCourse(courseId)
+    } catch (err) {
+      console.warn('[MyPage] 코스 삭제 실패, 목록을 다시 불러옵니다.', err)
+      setData(await loadMyPage())
     }
   }, [])
 
@@ -47,7 +71,7 @@ function MyPage() {
 
   const tabs = [
     { to: 'upcoming', label: '다가오는 여정', count: data.reservations.length },
-    { to: 'courses', label: '저장된 AI 여행 코스' },
+    { to: 'courses', label: '저장된 AI 여행 코스', count: data.courses.length },
     { to: 'scraps', label: '관심 스크랩', count: data.scraps.length },
   ]
 
@@ -56,7 +80,13 @@ function MyPage() {
       <Header />
       <main className={styles.page}>
         <div className={styles.container}>
-          {data.profile && <ProfileHero profile={data.profile} />}
+          <ProfileHero
+            counts={{
+              reservations: data.reservations.length,
+              courses: data.courses.length,
+              scraps: data.scraps.length,
+            }}
+          />
 
           {data.source === 'unavailable' && (
             <p className={styles.notice}>
@@ -77,7 +107,7 @@ function MyPage() {
             ))}
           </nav>
 
-          <Outlet context={{ ...data, unscrap }} />
+          <Outlet context={{ ...data, unscrap, removeCourse: dropCourse, cancelReservation }} />
         </div>
       </main>
       <Footer />

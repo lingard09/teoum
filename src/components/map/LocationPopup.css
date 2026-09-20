@@ -136,3 +136,21 @@
 .location-popup__related-category {
   color: var(--color-text-muted);
 }
+
+.location-popup__actions {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 8px;
+}
+
+.location-popup__actions .location-popup__cta {
+  margin: 0;
+  text-align: center;
+  text-decoration: none;
+}
+
+.location-popup__cta--outline {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}

@@ -9,10 +9,11 @@
   margin: 0;
   padding-top: 20px;
   color: var(--color-ink);
-  font-size: 36px;
-  font-weight: 700;
-  line-height: 48px;
   letter-spacing: -0.54px;
+
+  font-size: var(--section-title-size);
+  line-height: var(--section-title-line);
+  font-weight: var(--section-title-weight);
 }
 
 .grid {

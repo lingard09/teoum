@@ -22,6 +22,11 @@
   /* 피그마 시안의 제목 서체(가평한석봉). tokens.css에도 --font-heading이 있지만
      그건 .hanok-app 스코프 전용이라 CSS 모듈에서 참조할 수 없어 :root에 따로 둔다. */
   --font-display: 'Gapyeong Hanseokbong', var(--font-serif);
+
+  /* 페이지 본문 섹션 제목 공통 규칙. 탭마다 크기가 달라지지 않게 한 곳에서 정한다. */
+  --section-title-size: 22px;
+  --section-title-line: 32px;
+  --section-title-weight: 700;
 }
 
 *,

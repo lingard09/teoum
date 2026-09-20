@@ -17,7 +17,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db, ensureUser } from "./firebase.js";
-import { resolveIcon, resolveImage } from "../data/assets.js";
+import { resolveImage } from "../data/assets.js";
 
 function userDoc(uid) {
   return doc(db, "users", uid);
@@ -34,24 +34,12 @@ function hydrateProfile(profile) {
   return { ...profile, avatar: resolveImage(profile.avatarKey) };
 }
 
+/**
+ * 저장된 예약. 예약 화면에서 담은 값이라 이미지가 TourAPI 원격 URL이고,
+ * 별도 에셋 복원이 필요 없다.
+ */
 function hydrateReservation(reservation) {
-  return {
-    ...reservation,
-    image: resolveImage(reservation.imageKey),
-    category: {
-      ...reservation.category,
-      icon: resolveIcon(reservation.category.iconKey),
-    },
-    details: reservation.details.map((detail) => ({
-      ...detail,
-      icon: resolveIcon(detail.iconKey),
-    })),
-    actions: reservation.actions.map((action) => ({
-      ...action,
-      icon: resolveIcon(action.iconKey),
-      trailingIcon: resolveIcon(action.trailingIconKey),
-    })),
-  };
+  return reservation;
 }
 
 function hydrateScrap(scrap) {
@@ -59,21 +47,12 @@ function hydrateScrap(scrap) {
   return { ...scrap, image: scrap.imageUrl ?? resolveImage(scrap.imageKey) };
 }
 
+/**
+ * 저장된 AI 코스. 계획하기에서 만든 코스를 그대로 담아두므로 별도 에셋 복원이
+ * 필요 없다(장소 사진은 TourAPI 원격 URL이다).
+ */
 function hydrateCourse(course) {
-  return {
-    ...course,
-    days: course.days.map((day) => ({
-      ...day,
-      waypoints: day.waypoints.map((waypoint) => ({
-        ...waypoint,
-        image: resolveImage(waypoint.imageKey),
-        meta: waypoint.meta.map((item) => ({
-          ...item,
-          icon: resolveIcon(item.iconKey),
-        })),
-      })),
-    })),
-  };
+  return { ...course, stops: Array.isArray(course.stops) ? course.stops : [] };
 }
 
 /** Firestore를 못 쓸 때의 빈 상태. 더미로 채우지 않는다. */
@@ -83,7 +62,7 @@ function emptyData() {
     profile: null,
     reservations: [],
     scraps: [],
-    course: null,
+    courses: [],
   };
 }
 
@@ -112,7 +91,7 @@ async function readCollection(uid, name) {
 
 /**
  * 마이페이지 3개 탭이 쓰는 데이터를 한 번에 읽는다.
- * @returns {Promise<{source: 'firestore'|'fallback', profile, reservations, scraps, course}>}
+ * @returns {Promise<{source: 'firestore'|'unavailable', profile, reservations, scraps, courses}>}
  */
 async function fetchFromFirestore() {
   const uid = await ensureUser();
@@ -128,8 +107,7 @@ async function fetchFromFirestore() {
     profile: profileSnap.exists() ? hydrateProfile(profileSnap.data()) : null,
     reservations: reservations.map(hydrateReservation),
     scraps: scraps.map(hydrateScrap),
-    // 시안상 저장된 코스는 한 개만 보여준다. 코스가 없으면 목업으로 채운다.
-    course: courses[0] ? hydrateCourse(courses[0]) : null,
+    courses: courses.map(hydrateCourse),
   };
 }
 
@@ -190,4 +168,64 @@ export async function fetchScrapIds() {
     console.warn("[mypageApi] 스크랩 목록 조회 실패, 빈 상태로 표시합니다.", err);
     return new Set();
   }
+}
+
+/**
+ * 계획하기에서 만든 AI 코스를 보관함에 담는다.
+ * 문서 id는 저장 시각 기반이라 같은 조건으로 여러 번 만들어도 각각 남는다.
+ */
+export async function saveAiCourse(plan) {
+  const uid = await ensureUser();
+  const id = `ai-${Date.now()}`;
+  await setDoc(doc(userCollection(uid, "courses"), id), {
+    title: plan.title ?? "AI 맞춤 코스",
+    summary: plan.summary ?? null,
+    stops: (plan.stops ?? []).map((stop) => ({
+      contentId: String(stop.contentId),
+      name: stop.name ?? "",
+      address: stop.address ?? null,
+      image: stop.image ?? null,
+      time: stop.time ?? null,
+      reason: stop.reason ?? null,
+    })),
+    savedAt: formatScrapDate(new Date()),
+    // 마이페이지는 order로 정렬한다. 최근 저장이 위로 오도록 음수 타임스탬프를 쓴다.
+    order: -Date.now(),
+  });
+  return id;
+}
+
+/** 저장된 코스 삭제. */
+export async function removeCourse(courseId) {
+  const uid = await ensureUser();
+  await deleteDoc(doc(userCollection(uid, "courses"), courseId));
+}
+
+/**
+ * 예약 확정 시 보관함에 담는다. 장소 정보는 TourAPI에서 온 값이고, 일정·인원은
+ * 사용자가 예약 화면에서 고른 값이다. 결제 자체는 데모 플로우다.
+ */
+export async function saveReservation(reservation) {
+  const uid = await ensureUser();
+  const id = `rv-${Date.now()}`;
+  await setDoc(doc(userCollection(uid, "reservations"), id), {
+    contentId: reservation.contentId ? String(reservation.contentId) : null,
+    title: reservation.title ?? "예약",
+    location: reservation.location ?? null,
+    image: reservation.image ?? null,
+    dateLabel: reservation.dateLabel ?? null,
+    slotLabel: reservation.slotLabel ?? null,
+    peopleLabel: reservation.peopleLabel ?? null,
+    totalLabel: reservation.totalLabel ?? null,
+    typeLabel: reservation.typeLabel ?? null,
+    savedAt: formatScrapDate(new Date()),
+    order: -Date.now(),
+  });
+  return id;
+}
+
+/** 예약 취소. */
+export async function removeReservation(reservationId) {
+  const uid = await ensureUser();
+  await deleteDoc(doc(userCollection(uid, "reservations"), reservationId));
 }

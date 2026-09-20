@@ -1,16 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { kakaoDirectionsUrl } from "../../utils/mapLinks.js";
 import Badge from "../common/Badge.jsx";
 import { fetchRelatedSpots } from "../../api/villageApi.js";
 import "./LocationPopup.css";
-
-/**
- * 코스 검색에 쓸 지역어를 뽑는다. "안동 하회마을" 같은 이름에서 앞 단어만 쓰면
- * TourAPI 여행코스 제목과 더 잘 맞는다(코스 제목은 "안동 1박2일…" 형태가 많다).
- */
-function searchTermFor(name) {
-  return (name ?? "").split(/[\s·&]/)[0] || name;
-}
 
 const CONGESTION_BADGE_VARIANT = { low: "success", medium: "warning", high: "danger" };
 
@@ -91,10 +84,22 @@ function LocationPopup({ village, point, onClose }) {
         </div>
       )}
 
-      {/* 이 마을 이름으로 여행코스를 검색한 결과로 이동한다. */}
-      <Link to={`/plan?q=${encodeURIComponent(searchTermFor(name))}`} className="location-popup__cta">
-        <span aria-hidden="true">✦</span> 여정 생성
-      </Link>
+      <div className="location-popup__actions">
+        {/* contentId가 있어야 상세를 열 수 있다(큐레이션 없이 API 항목만 남아 항상 있다). */}
+        {village.tourApiContentId && (
+          <Link to={`/experiences/${village.tourApiContentId}`} className="location-popup__cta">
+            상세정보 보기
+          </Link>
+        )}
+        <a
+          href={kakaoDirectionsUrl(village)}
+          target="_blank"
+          rel="noreferrer"
+          className="location-popup__cta location-popup__cta--outline"
+        >
+          길찾기
+        </a>
+      </div>
     </div>
   );
 }

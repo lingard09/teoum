@@ -1,61 +1,8 @@
+/* 저장된 AI 코스 목록. */
 .section {
   display: flex;
   flex-direction: column;
   gap: 24px;
-}
-
-.heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 16px 24px;
-}
-
-.titleBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-top: 20px;
-}
-
-.title {
-  margin: 0;
-  color: var(--color-ink);
-  font-size: 36px;
-  font-weight: 700;
-  line-height: 48px;
-  letter-spacing: -0.54px;
-}
-
-.description {
-  margin: 0;
-  color: var(--color-ink-sub);
-  font-size: 15px;
-  line-height: 24px;
-}
-
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 24px;
-  padding: 5px 0;
-}
-
-.toolbar > button {
-  gap: 6px;
-}
-
-.toolbar > .latin {
-  font-family: var(--font-latin);
-  font-weight: 600;
-}
-
-@media (max-width: 720px) {
-  .toolbar {
-    gap: 8px;
-  }
 }
 
 .empty {
@@ -64,4 +11,166 @@
   color: var(--color-ink-sub);
   font-size: 16px;
   text-align: center;
+}
+
+.empty a {
+  color: var(--color-green);
+}
+
+.card {
+  padding: 28px;
+  border: 1px solid rgba(233, 225, 215, 0.6);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.title {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+
+  font-size: var(--section-title-size);
+  line-height: var(--section-title-line);
+  font-weight: var(--section-title-weight);
+}
+
+.description {
+  margin: 6px 0 0;
+  color: var(--color-ink-sub);
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.savedAt {
+  color: var(--color-ink-sub);
+  font-family: var(--font-latin);
+  font-size: 12px;
+}
+
+.removeButton {
+  padding: 6px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-ink-sub);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.removeButton:hover {
+  color: #c0392b;
+}
+
+.stops {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stop {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--color-bg);
+}
+
+.stopNumber {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: var(--color-surface-2);
+  color: var(--color-ink);
+  font-family: var(--font-latin);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.stopImage {
+  flex-shrink: 0;
+  width: 92px;
+  height: 64px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.stopBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.stopHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stopTime {
+  color: var(--color-green);
+  font-family: var(--font-latin);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stopName {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.stopAddress {
+  margin: 2px 0 0;
+  color: var(--color-ink-sub);
+  font-size: 12px;
+}
+
+.stopReason {
+  margin: 4px 0 0;
+  color: var(--color-ink-sub);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.stopLink {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .stopImage {
+    display: none;
+  }
 }
