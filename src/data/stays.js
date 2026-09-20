@@ -10,12 +10,8 @@ import gangneungSeongyojang from '../assets/images/gangneung-seongyojang.png'
 export const hero = {
   heading: ['마루에 앉아 하늘을 바라보는', '고택의 하루'],
   description: [
-    "문화체육관광부·한국관광공사 품질인증 '한국관광 품질인증(KQ)' 고택부터 300년 종가 독채, 현대",
-    '적 편의를 갖춘 프리미엄 한옥스테이 80여 곳을 엄선했습니다.',
-  ],
-  metrics: [
-    { label: '공식 인증 고택', value: '84', unit: '선' },
-    { label: '평균 만족도', value: '4.94', unit: '/5.0' },
+    '한국관광공사 TourAPI에 등록된 한옥·고택 숙소를 실시간으로 불러옵니다.',
+    '객실 구성과 체크인 시각, 문의처는 모두 공공데이터 원본입니다.',
   ],
 }
 

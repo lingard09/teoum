@@ -417,3 +417,38 @@
     line-height: 38px;
   }
 }
+
+/* ------------------------------------------------ 실데이터 전용 상태/요소 */
+.emptyState {
+  margin: 0;
+  padding: 80px 0;
+  color: var(--color-ink-sub);
+  font-size: 16px;
+  text-align: center;
+}
+
+.emptyState a {
+  color: var(--color-green);
+}
+
+.overview {
+  margin: 0;
+  color: var(--color-ink-sub);
+  font-size: 15px;
+  line-height: 25px;
+}
+
+/* 경유지 사진. TourAPI가 주는 이미지라 비율이 제각각이라 고정 박스에 맞춘다. */
+.stepImage {
+  flex-shrink: 0;
+  width: 120px;
+  height: 84px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+@media (max-width: 720px) {
+  .stepImage {
+    display: none;
+  }
+}

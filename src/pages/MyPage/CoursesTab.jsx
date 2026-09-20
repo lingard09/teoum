@@ -8,6 +8,14 @@ import styles from './CoursesTab.module.css'
 function CoursesTab() {
   const { course } = useOutletContext()
 
+  if (!course) {
+    return (
+      <p className={styles.empty}>
+        저장된 코스가 없습니다. 계획하기에서 마음에 드는 여행코스를 담아보세요.
+      </p>
+    )
+  }
+
   return (
     <section className={styles.section} aria-label="저장된 AI 여행 코스">
       <div className={styles.heading}>

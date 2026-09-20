@@ -10,10 +10,9 @@ import icheonPotteryWheel from '../assets/images/icheon-pottery-wheel.png'
 export const hero = {
   heading: ['장인의 숨결과 시간이 머무는', '전국 전통 문화체험'],
   description: [
-    '국가무형유산 전승자부터 로컬 청년 장인까지, 전국 한옥마을 곳곳에 살아 숨 쉬는 우리 문화',
-    '의 깊이를 직접 만나는 120여 개 정규·시즌 워크숍.',
+    '한국관광공사 TourAPI의 체험관광지 분류 중 전통체험·산사체험만 골라 불러옵니다.',
+    '프로그램과 운영시간, 문의처는 모두 공공데이터 원본입니다.',
   ],
-  searchPlaceholder: '체험명, 지역(북촌, 전주, 안동), 장인 이름 검색',
 }
 
 export const categories = [

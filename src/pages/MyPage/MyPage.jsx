@@ -56,12 +56,11 @@ function MyPage() {
       <Header />
       <main className={styles.page}>
         <div className={styles.container}>
-          <ProfileHero profile={data.profile} />
+          {data.profile && <ProfileHero profile={data.profile} />}
 
-          {data.source === 'fallback' && (
+          {data.source === 'unavailable' && (
             <p className={styles.notice}>
-              Firestore에 연결하지 못해 임시 데이터를 보여주고 있습니다. 변경한 내용은 저장되지
-              않습니다.
+              보관함을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
             </p>
           )}
 

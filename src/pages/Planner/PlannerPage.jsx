@@ -1,16 +1,42 @@
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../components/Header/Header.jsx'
 import Footer from '../../components/Footer/Footer.jsx'
 import Icon from '../../components/Icon/Icon.jsx'
 import { icons } from '../../assets/icons/index.js'
-import { plan } from '../../data/aiPlan.js'
-import { cx } from '../../utils/cx.js'
+import { fetchCourseDetail } from '../../api/courseApi.js'
 import styles from './PlannerPage.module.css'
 
-const TAG_TONES = { sand: styles.tagSand, mint: styles.tagMint }
-
+/**
+ * 여행코스 상세. 경유지·총거리·소요시간 모두 TourAPI 실데이터다.
+ * 코스를 지정하지 않고 들어오면 목록으로 돌려보낸다.
+ */
 function PlannerPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const courseId = searchParams.get('course')
+
+  const [detail, setDetail] = useState(null)
+  const [status, setStatus] = useState(courseId ? 'loading' : 'none')
+
+  useEffect(() => {
+    if (!courseId) return undefined
+    let alive = true
+    fetchCourseDetail(courseId).then((d) => {
+      if (!alive) return
+      setDetail(d)
+      setStatus(d ? 'ready' : 'failed')
+    })
+    return () => {
+      alive = false
+    }
+  }, [courseId])
+
+  const conditions = [
+    detail?.distance && { iconKey: 'planPin', label: detail.distance },
+    detail?.takeTime && { iconKey: 'planCalendar', label: detail.takeTime },
+    detail?.theme && { iconKey: 'planMood', label: detail.theme },
+  ].filter(Boolean)
 
   return (
     <>
@@ -19,25 +45,32 @@ function PlannerPage() {
       <header className={styles.topBar}>
         <div className={styles.topInner}>
           <div className={styles.titleBlock}>
-            <h1 className={styles.title}>{plan.title}</h1>
-            <p className={styles.subtitle}>{plan.subtitle}</p>
+            <h1 className={styles.title}>{detail?.title ?? '여행코스'}</h1>
+            <p className={styles.subtitle}>
+              {status === 'ready'
+                ? '한국관광공사 TourAPI 여행코스 데이터'
+                : status === 'loading'
+                  ? '코스를 불러오는 중…'
+                  : '코스를 선택하면 경유지가 표시됩니다.'}
+            </p>
           </div>
 
           <div className={styles.topActions}>
-            <div className={styles.conditions}>
-              {plan.conditions.map((condition, index) => (
-                <div key={condition.label} className={styles.condition}>
-                  {index > 0 && <span className={styles.conditionDivider} aria-hidden="true" />}
-                  <Icon {...icons[condition.iconKey]} />
-                  <span>{condition.label}</span>
-                </div>
-              ))}
-            </div>
+            {conditions.length > 0 && (
+              <div className={styles.conditions}>
+                {conditions.map((condition, index) => (
+                  <div key={condition.label} className={styles.condition}>
+                    {index > 0 && <span className={styles.conditionDivider} aria-hidden="true" />}
+                    <Icon {...icons[condition.iconKey]} />
+                    <span>{condition.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
 
-            {/* 조건을 다시 고르려면 큐레이션 목록의 필터로 돌아간다. */}
             <button type="button" className={styles.changeButton} onClick={() => navigate('/plan')}>
               <Icon {...icons.planRefresh} />
-              조건 변경
+              다른 코스 보기
             </button>
           </div>
         </div>
@@ -45,85 +78,62 @@ function PlannerPage() {
 
       <main className={styles.page}>
         <div className={styles.container}>
-          <div className={styles.sectionHead}>
-            <div className={styles.sectionTitleRow}>
-              <h2 className={styles.sectionTitle}>핵심 추천 코스</h2>
-              <span className={styles.countBadge}>{plan.summary.countLabel}</span>
-            </div>
-            <div className={styles.sectionMeta}>
-              <span className={styles.metaItem}>
-                <Icon {...icons.planWeather} />
-                {plan.summary.weather}
-              </span>
-              <span className={styles.metaDivider} aria-hidden="true">
-                |
-              </span>
-              <span className={styles.metaItem}>
-                <Icon {...icons.planWalk} />
-                {plan.summary.walk}
-              </span>
-            </div>
-          </div>
+          {status === 'none' && (
+            <p className={styles.emptyState}>
+              선택된 코스가 없습니다. <Link to="/plan">여행코스 목록</Link>에서 코스를 골라 주세요.
+            </p>
+          )}
 
-          <ol className={styles.steps}>
-            {plan.steps.map((step, index) => (
-              <li key={step.time} className={styles.step}>
-                <span className={cx(styles.stepNumber, step.last && styles.stepNumberLast)}>
-                  {String(index + 1).padStart(2, '0')}
-                </span>
+          {status === 'loading' && <p className={styles.emptyState}>경유지를 불러오는 중…</p>}
 
-                <div className={styles.stepBody}>
-                  <div className={styles.stepHeading}>
-                    <span className={styles.stepTime}>{step.time}</span>
-                    <h3 className={styles.stepTitle}>{step.title}</h3>
-                    {step.tag && (
-                      <span className={cx(styles.tag, TAG_TONES[step.tag.tone])}>
-                        {step.tag.label}
-                      </span>
-                    )}
-                  </div>
-                  <p className={styles.stepDesc}>{step.description}</p>
+          {status === 'failed' && (
+            <p className={styles.emptyState}>
+              TourAPI에서 코스를 불러오지 못했습니다. <Link to="/plan">목록으로 돌아가기</Link>
+            </p>
+          )}
+
+          {status === 'ready' && (
+            <>
+              {detail.overview && <p className={styles.overview}>{detail.overview}</p>}
+
+              <div className={styles.sectionHead}>
+                <div className={styles.sectionTitleRow}>
+                  <h2 className={styles.sectionTitle}>코스 경유지</h2>
+                  <span className={styles.countBadge}>총 {detail.waypoints.length}곳</span>
                 </div>
-              </li>
-            ))}
-          </ol>
+                {detail.schedule && (
+                  <div className={styles.sectionMeta}>
+                    <span className={styles.metaItem}>{detail.schedule}</span>
+                  </div>
+                )}
+              </div>
 
-          <section className={styles.routeCard} aria-label={plan.route.heading}>
-            <div className={styles.routeHead}>
-              <span className={styles.routeTitle}>
-                <Icon {...icons.planMap} />
-                {plan.route.heading}
-              </span>
-              <span className={styles.routeArea}>{plan.route.areaLabel}</span>
-            </div>
+              {detail.waypoints.length === 0 ? (
+                <p className={styles.emptyState}>이 코스에는 등록된 경유지 정보가 없습니다.</p>
+              ) : (
+                <ol className={styles.steps}>
+                  {detail.waypoints.map((waypoint, index) => (
+                    <li key={waypoint.name} className={styles.step}>
+                      <span className={styles.stepNumber}>{String(index + 1).padStart(2, '0')}</span>
 
-            <div className={styles.routeMap}>
-              <img src={plan.route.image} alt="" />
-              <span className={styles.routeOverlay} aria-hidden="true" />
-              <span className={styles.routePath}>{plan.route.pathLabel}</span>
-            </div>
-          </section>
+                      {waypoint.image && (
+                        <img className={styles.stepImage} src={waypoint.image} alt="" />
+                      )}
 
-          <section className={styles.saveBar}>
-            <div className={styles.saveText}>
-              <Icon {...icons.planBookmark} />
-              <p>
-                <span className={styles.saveTitle}>{plan.cta.title}</span>
-                <span className={styles.saveDesc}>{plan.cta.description}</span>
-              </p>
-            </div>
-
-            <div className={styles.saveActions}>
-              <button type="button" className={styles.saveButton}>
-                <Icon {...icons.planSave} />
-                일정 저장
-              </button>
-              <button type="button" className={styles.kakaoButton}>
-                <Icon {...icons.planKakao} />
-                카카오톡 공유
-              </button>
-            </div>
-          </section>
+                      <div className={styles.stepBody}>
+                        <div className={styles.stepHeading}>
+                          <h3 className={styles.stepTitle}>{waypoint.name}</h3>
+                        </div>
+                        {waypoint.description && (
+                          <p className={styles.stepDesc}>{waypoint.description}</p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </>
+          )}
         </div>
       </main>
 

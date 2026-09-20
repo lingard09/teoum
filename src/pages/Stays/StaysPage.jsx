@@ -11,17 +11,11 @@ import {
   categories,
   regions,
   conditionFilters,
-  totalCount,
-  pageCount,
-  stays,
 } from '../../data/stays.js'
 import { addScrap, fetchScrapIds, removeScrap } from '../../api/mypageApi.js'
 import { fetchStays } from '../../api/stayApi.js'
 import ApiStayCard from './ApiStayCard.jsx'
-import StayCard from './StayCard.jsx'
 import styles from './StaysPage.module.css'
-
-const PAGE_ITEMS = [1, 2, 3, 4, '…', pageCount]
 
 function StaysPage() {
   const [activeCategory, setActiveCategory] = useState('all')
@@ -29,7 +23,6 @@ function StaysPage() {
   const [checkedConditions, setCheckedConditions] = useState(
     () => new Set(conditionFilters.filter((f) => f.defaultChecked).map((f) => f.id)),
   )
-  const [currentPage, setCurrentPage] = useState(1)
 
   // 스크랩 상태는 카드마다 따로 읽으면 요청이 카드 수만큼 나가므로 페이지에서 한 번만 읽는다.
   const [scrappedIds, setScrappedIds] = useState(() => new Set())
@@ -37,11 +30,14 @@ function StaysPage() {
   // TourAPI 숙박(contentTypeId=32)에서 실제 한옥 숙소를 받아온다.
   // 실패하거나 키가 없으면 apiStays가 비어서 큐레이션 목업만 보인다.
   const [apiStays, setApiStays] = useState([])
+  const [apiTotal, setApiTotal] = useState(0)
 
   useEffect(() => {
     let alive = true
-    fetchStays().then(({ stays: list }) => {
-      if (alive) setApiStays(list)
+    fetchStays().then(({ stays: list, totalCount: total }) => {
+      if (!alive) return
+      setApiStays(list)
+      setApiTotal(total)
     })
     return () => {
       alive = false
@@ -125,18 +121,15 @@ function StaysPage() {
               </div>
 
               <div className={styles.metrics}>
-                {hero.metrics.map((metric, i) => (
-                  <div key={metric.label} className={styles.metricGroup}>
-                    {i > 0 && <span className={styles.metricDivider} aria-hidden="true" />}
-                    <div className={styles.metric}>
-                      <span className={styles.metricLabel}>{metric.label}</span>
-                      <span className={styles.metricValue}>
-                        {metric.value}
-                        <span className={styles.metricUnit}>{metric.unit}</span>
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                {/* 시안의 "공식 인증 고택 84선 / 평균 만족도 4.94"는 근거 없는 값이라
+                    TourAPI가 실제로 돌려준 검색 건수로 대체했다. */}
+                <div className={styles.metric}>
+                  <span className={styles.metricLabel}>TourAPI 한옥 숙소</span>
+                  <span className={styles.metricValue}>
+                    {apiTotal || '—'}
+                    <span className={styles.metricUnit}>건</span>
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -204,7 +197,7 @@ function StaysPage() {
 
               <div className={styles.refinementRight}>
                 <span className={styles.count}>
-                  총 <strong className={styles.countStrong}>{totalCount}개</strong> 한옥 중 추천 6선
+                  TourAPI 등록 한옥 숙소 <strong className={styles.countStrong}>{apiTotal}건</strong> 중 {apiStays.length}곳 표시
                 </span>
                 <div className={styles.sortWrap}>
                   <span>하루한옥 추천순</span>
@@ -218,14 +211,6 @@ function StaysPage() {
         <section className={styles.gridSection}>
           <div className={styles.container}>
             <div className={styles.grid}>
-              {stays.map((stay) => (
-                <StayCard
-                  key={stay.id}
-                  stay={stay}
-                  saved={scrappedIds.has(stay.id)}
-                  onToggleSave={() => toggleScrap(stay)}
-                />
-              ))}
 
               {apiStays.map((stay) => (
                 <ApiStayCard
@@ -245,43 +230,6 @@ function StaysPage() {
                 />
               ))}
             </div>
-
-            <nav className={styles.pagination} aria-label="한옥 스테이 목록 페이지">
-              <button
-                type="button"
-                className={styles.pageArrow}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                aria-label="이전 페이지"
-              >
-                <Icon {...icons.stayPaginationPrev} />
-              </button>
-              {PAGE_ITEMS.map((item, i) =>
-                item === '…' ? (
-                  <span key={`ellipsis-${i}`} className={styles.pageEllipsis}>
-                    …
-                  </span>
-                ) : (
-                  <button
-                    key={item}
-                    type="button"
-                    className={cx(styles.pageNumber, currentPage === item && styles.pageNumberActive)}
-                    onClick={() => setCurrentPage(item)}
-                  >
-                    {item}
-                  </button>
-                ),
-              )}
-              <button
-                type="button"
-                className={styles.pageArrow}
-                onClick={() => setCurrentPage((p) => Math.min(pageCount, p + 1))}
-                disabled={currentPage === pageCount}
-                aria-label="다음 페이지"
-              >
-                <Icon {...icons.stayPaginationNext} />
-              </button>
-            </nav>
           </div>
         </section>
       </main>

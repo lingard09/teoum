@@ -2,12 +2,9 @@
  * 마이페이지 데이터 계층 (Firestore).
  *
  * 구조: users/{uid} 문서에 프로필, 그 아래 reservations/scraps/courses 하위 컬렉션.
- * 익명 로그인이라 계정은 브라우저마다 새로 생기므로, 처음 들어온 uid에는
- * mypageSeed.js의 기본 데이터를 한 번 심어준다(그래야 첫 방문자도 빈 화면 대신
- * 시안대로 채워진 마이페이지를 본다).
  *
- * villageApi.js와 마찬가지로 네트워크/권한 문제로 실패하면 조용히 목업으로
- * 폴백해서 화면이 깨지지 않게 한다.
+ * 더미 없는 버전이라 기본 데이터를 심지 않는다. 사용자가 직접 담은 것만 보이고,
+ * 아무것도 없으면 빈 상태를 그대로 보여준다. 조회에 실패해도 목업으로 채우지 않는다.
  */
 import {
   collection,
@@ -18,16 +15,9 @@ import {
   orderBy,
   query,
   setDoc,
-  writeBatch,
 } from "firebase/firestore";
 import { db, ensureUser } from "./firebase.js";
 import { resolveIcon, resolveImage } from "../data/assets.js";
-import {
-  coursesSeed,
-  profileSeed,
-  reservationsSeed,
-  scrapsSeed,
-} from "../data/mypageSeed.js";
 
 function userDoc(uid) {
   return doc(db, "users", uid);
@@ -86,14 +76,14 @@ function hydrateCourse(course) {
   };
 }
 
-/** Firestore를 못 쓸 때 쓰는 목업 스냅샷. 화면 입장에서는 정상 응답과 구분되지 않는다. */
-function fallbackData() {
+/** Firestore를 못 쓸 때의 빈 상태. 더미로 채우지 않는다. */
+function emptyData() {
   return {
-    source: "fallback",
-    profile: hydrateProfile(profileSeed),
-    reservations: reservationsSeed.map(hydrateReservation),
-    scraps: scrapsSeed.map(hydrateScrap),
-    course: hydrateCourse(coursesSeed[0]),
+    source: "unavailable",
+    profile: null,
+    reservations: [],
+    scraps: [],
+    course: null,
   };
 }
 
@@ -112,29 +102,6 @@ function withTimeout(promise, ms) {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
-// ------------------------------------------------------------------- 시딩
-
-/** users/{uid} 문서가 없으면(= 이 브라우저의 첫 방문) 기본 데이터를 한 번에 심는다. */
-async function seedIfNeeded(uid) {
-  const snap = await getDoc(userDoc(uid));
-  if (snap.exists()) return;
-
-  const batch = writeBatch(db);
-  batch.set(userDoc(uid), profileSeed);
-
-  const seedCollection = (name, rows) => {
-    rows.forEach(({ id, ...fields }) => {
-      batch.set(doc(userCollection(uid, name), id), fields);
-    });
-  };
-
-  seedCollection("reservations", reservationsSeed);
-  seedCollection("scraps", scrapsSeed);
-  seedCollection("courses", coursesSeed);
-
-  await batch.commit();
-}
-
 // ------------------------------------------------------------------- 조회
 
 /** 문서 id를 데이터에 다시 얹어서 돌려준다(저장할 땐 id를 본문에 중복 저장하지 않으므로). */
@@ -149,8 +116,6 @@ async function readCollection(uid, name) {
  */
 async function fetchFromFirestore() {
   const uid = await ensureUser();
-  await seedIfNeeded(uid);
-
   const [profileSnap, reservations, scraps, courses] = await Promise.all([
     getDoc(userDoc(uid)),
     readCollection(uid, "reservations"),
@@ -160,11 +125,11 @@ async function fetchFromFirestore() {
 
   return {
     source: "firestore",
-    profile: hydrateProfile(profileSnap.data() ?? profileSeed),
+    profile: profileSnap.exists() ? hydrateProfile(profileSnap.data()) : null,
     reservations: reservations.map(hydrateReservation),
     scraps: scraps.map(hydrateScrap),
     // 시안상 저장된 코스는 한 개만 보여준다. 코스가 없으면 목업으로 채운다.
-    course: hydrateCourse(courses[0] ?? coursesSeed[0]),
+    course: courses[0] ? hydrateCourse(courses[0]) : null,
   };
 }
 
@@ -173,7 +138,7 @@ export async function loadMyPage() {
     return await withTimeout(fetchFromFirestore(), LOAD_TIMEOUT_MS);
   } catch (err) {
     console.warn("[mypageApi] Firestore 로드 실패, 목업 데이터로 대체합니다.", err);
-    return fallbackData();
+    return emptyData();
   }
 }
 
