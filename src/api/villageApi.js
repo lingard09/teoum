@@ -170,11 +170,15 @@ async function fetchExtraApiVillages() {
   }
 }
 
-export async function fetchFeaturedVillages() {
-  if (hasTourApiKey()) {
-    return enrichAll(featuredVillages);
+export async function fetchFeaturedVillages({ limit = 4 } = {}) {
+  if (!hasTourApiKey()) return delay([]);
+
+  // 큐레이션 목록이 비어 있으면(더미 없는 구성) TourAPI 검색 결과 앞쪽을 쓴다.
+  if (featuredVillages.length === 0) {
+    const extra = await fetchExtraApiVillages();
+    return extra.slice(0, limit);
   }
-  return delay(featuredVillages);
+  return enrichAll(featuredVillages);
 }
 
 function filterVillages(list, { region, keyword }) {

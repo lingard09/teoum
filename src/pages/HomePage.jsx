@@ -2,15 +2,25 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Hero from "../components/home/Hero.jsx";
 import TourismCard from "../components/common/TourismCard.jsx";
-import StoryCard from "../components/common/StoryCard.jsx";
-import ExperienceCard from "../components/common/ExperienceCard.jsx";
 import Footer from "../components/Footer/Footer.jsx";
 import { fetchFeaturedVillages } from "../api/villageApi.js";
-import { stories } from "../data/stories.js";
-import { homeExperiences } from "../data/homeExperiences.js";
+import { fetchExperiences } from "../api/experienceApi.js";
 import "./HomePage.css";
 
 function HomePage() {
+  // 홈 체험 섹션도 TourAPI 실데이터로 채운다.
+  const [apiExperiences, setApiExperiences] = useState([]);
+
+  useEffect(() => {
+    let alive = true;
+    fetchExperiences({ limit: 4 }).then(({ experiences }) => {
+      if (alive) setApiExperiences(experiences);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const [villages, setVillages] = useState([]);
 
   useEffect(() => {
@@ -49,22 +59,6 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="section section--muted">
-        <div className="container">
-          <div className="section-head">
-            <h2 className="section-head__title">고택과 선비 정신, 문화 아카이브</h2>
-            <div className="section-head__links">
-              <a href="#stories">전체보기</a>
-            </div>
-          </div>
-          <div className="story-grid">
-            {stories.map((story) => (
-              <StoryCard key={story.id} story={story} />
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="section">
         <div className="container">
           <div className="section-head">
@@ -74,8 +68,22 @@ function HomePage() {
             </div>
           </div>
           <div className="experience-grid">
-            {homeExperiences.map((exp) => (
-              <ExperienceCard key={exp.id} experience={exp} />
+            {apiExperiences.map((exp) => (
+
+              <article key={exp.id} className="home-exp-card">
+
+                <img src={exp.image} alt="" />
+
+                <div>
+
+                  <p className="home-exp-card__location">{exp.location}</p>
+
+                  <h3 className="home-exp-card__title">{exp.name}</h3>
+
+                </div>
+
+              </article>
+
             ))}
           </div>
         </div>

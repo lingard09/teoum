@@ -77,7 +77,7 @@ function mapExperience(item) {
  * @returns {Promise<{source: 'tourapi'|'fallback', experiences: Array}>}
  */
 export async function fetchExperiences({ limit = API_ITEM_LIMIT } = {}) {
-  if (!hasTourApiKey()) return { source: "fallback", experiences: [] };
+  if (!hasTourApiKey()) return { source: "unavailable", experiences: [], totalCount: 0 };
 
   try {
     const results = await Promise.all(
@@ -100,10 +100,13 @@ export async function fetchExperiences({ limit = API_ITEM_LIMIT } = {}) {
       }
     }
 
-    return { source: "tourapi", experiences: [...byId.values()].slice(0, limit) };
+    const collected = [...byId.values()];
+    // 키워드 11개 결과가 겹쳐서 API 총건수를 더하면 중복이 섞인다.
+    // 중복 제거 후 실제로 모인 후보 수를 그대로 쓴다.
+    return { source: "tourapi", experiences: collected.slice(0, limit), totalCount: collected.length };
   } catch (err) {
-    console.warn("[experienceApi] 체험 목록 조회 실패, 큐레이션 목업으로 대체합니다.", err);
-    return { source: "fallback", experiences: [] };
+    console.warn("[experienceApi] 체험 목록 조회 실패", err);
+    return { source: "unavailable", experiences: [], totalCount: 0 };
   }
 }
 

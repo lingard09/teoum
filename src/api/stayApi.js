@@ -66,7 +66,7 @@ function mapStay(item) {
  * @returns {Promise<{source: 'tourapi'|'fallback', stays: Array}>}
  */
 export async function fetchStays({ numOfRows = 24 } = {}) {
-  if (!hasTourApiKey()) return { source: "fallback", stays: [] };
+  if (!hasTourApiKey()) return { source: "unavailable", stays: [], totalCount: 0 };
 
   try {
     const results = await Promise.all(
@@ -80,6 +80,10 @@ export async function fetchStays({ numOfRows = 24 } = {}) {
       ),
     );
 
+    // 키워드별 결과가 겹쳐서 고유 총합은 API로 알 수 없다.
+    // 대표 키워드("한옥")의 총건수를 그대로 노출한다.
+    const totalCount = results[0]?.totalCount ?? 0;
+
     const byId = new Map();
     for (const { items } of results) {
       for (const item of items) {
@@ -89,10 +93,14 @@ export async function fetchStays({ numOfRows = 24 } = {}) {
       }
     }
 
-    return { source: "tourapi", stays: [...byId.values()].slice(0, API_ITEM_LIMIT) };
+    return {
+      source: "tourapi",
+      stays: [...byId.values()].slice(0, API_ITEM_LIMIT),
+      totalCount,
+    };
   } catch (err) {
-    console.warn("[stayApi] 숙박 목록 조회 실패, 큐레이션 목업으로 대체합니다.", err);
-    return { source: "fallback", stays: [] };
+    console.warn("[stayApi] 숙박 목록 조회 실패", err);
+    return { source: "unavailable", stays: [], totalCount: 0 };
   }
 }
 

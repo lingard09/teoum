@@ -10,14 +10,10 @@ import {
   regions,
   difficultyFilters,
   sortOptions,
-  totalCount,
-  pageCount,
-  experiences,
   trustItems,
 } from '../../data/experiences.js'
 import { fetchExperiences } from '../../api/experienceApi.js'
 import ApiExperienceCard from './ApiExperienceCard.jsx'
-import ExperienceCard from './ExperienceCard.jsx'
 import styles from './ExperiencesPage.module.css'
 
 function ExperiencesPage() {
@@ -27,11 +23,14 @@ function ExperiencesPage() {
   // TourAPI 관광지/문화시설에서 실제 체험 시설을 받아온다.
   // 키가 없거나 실패하면 비어서 큐레이션 목업만 보인다.
   const [apiExperiences, setApiExperiences] = useState([])
+  const [apiTotal, setApiTotal] = useState(0)
 
   useEffect(() => {
     let alive = true
-    fetchExperiences().then(({ experiences: list }) => {
-      if (alive) setApiExperiences(list)
+    fetchExperiences().then(({ experiences: list, totalCount: total }) => {
+      if (!alive) return
+      setApiExperiences(list)
+      setApiTotal(total)
     })
     return () => {
       alive = false
@@ -40,7 +39,6 @@ function ExperiencesPage() {
   const [activeRegion, setActiveRegion] = useState('전국')
   const [activeDifficulty, setActiveDifficulty] = useState(() => new Set(['instant']))
   const [sortId, setSortId] = useState('recommended')
-  const [currentPage, setCurrentPage] = useState(1)
 
   function toggleDifficulty(id) {
     setActiveDifficulty((prev) => {
@@ -139,7 +137,7 @@ function ExperiencesPage() {
 
               <div className={styles.refinementRight}>
                 <span className={styles.count}>
-                  총 <strong className={styles.countStrong}>{totalCount}</strong>개 체험 프로그램
+                  TourAPI 검색 결과 <strong className={styles.countStrong}>{apiTotal}</strong>곳
                 </span>
                 <div className={styles.sortWrap}>
                   <select
@@ -164,45 +162,11 @@ function ExperiencesPage() {
         <section className={styles.gridSection}>
           <div className={styles.container}>
             <div className={styles.grid}>
-              {experiences.map((experience) => (
-                <ExperienceCard key={experience.id} experience={experience} />
-              ))}
 
               {apiExperiences.map((experience) => (
                 <ApiExperienceCard key={experience.id} experience={experience} />
               ))}
             </div>
-
-            <nav className={styles.pagination} aria-label="체험 목록 페이지">
-              <button
-                type="button"
-                className={styles.pageArrow}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                aria-label="이전 페이지"
-              >
-                <Icon {...icons.paginationPrev} />
-              </button>
-              {Array.from({ length: pageCount }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  type="button"
-                  className={cx(styles.pageNumber, currentPage === page && styles.pageNumberActive)}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
-              ))}
-              <button
-                type="button"
-                className={styles.pageArrow}
-                onClick={() => setCurrentPage((p) => Math.min(pageCount, p + 1))}
-                disabled={currentPage === pageCount}
-                aria-label="다음 페이지"
-              >
-                <Icon {...icons.paginationNext} />
-              </button>
-            </nav>
           </div>
         </section>
 

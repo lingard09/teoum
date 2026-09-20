@@ -36,3 +36,36 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* 홈 체험 섹션(TourAPI). 목업 ExperienceCard를 대체한다. */
+.home-exp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.home-exp-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.home-exp-card > div {
+  padding: 0 16px 16px;
+}
+
+.home-exp-card__location {
+  margin: 0 0 4px;
+  color: var(--color-text-muted);
+  font-size: var(--fs-tiny, 12px);
+}
+
+.home-exp-card__title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 16px;
+  line-height: 24px;
+}
