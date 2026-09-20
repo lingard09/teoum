@@ -211,3 +211,32 @@
 .apiReserveButton:hover {
   filter: brightness(1.15);
 }
+
+.apiActions {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.apiActions .apiReserveButton {
+  margin-top: 0;
+}
+
+.apiDetailButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.apiDetailButton:hover {
+  background: var(--color-surface);
+}

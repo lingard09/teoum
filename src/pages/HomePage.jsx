@@ -7,6 +7,23 @@ import { fetchFeaturedVillages } from "../api/villageApi.js";
 import { fetchExperiences } from "../api/experienceApi.js";
 import "./HomePage.css";
 
+/** "경상남도 함양군 지곡면 개평길 59" → "경남 함양" 처럼 배지용으로 줄인다. */
+function shortRegion(address) {
+  if (!address) return "전국";
+  const [sido = "", sigungu = ""] = address.split(" ");
+  const short = sido
+    .replace("특별자치도", "")
+    .replace("특별자치시", "")
+    .replace("광역시", "")
+    .replace("특별시", "")
+    .replace("충청", "충")
+    .replace("경상", "경")
+    .replace("전라", "전")
+    .replace("강원", "강원")
+    .replace(/도$/, "");
+  return [short, sigungu].filter(Boolean).join(" ");
+}
+
 function HomePage() {
   // 홈 체험 섹션도 TourAPI 실데이터로 채운다.
   const [apiExperiences, setApiExperiences] = useState([]);
@@ -69,21 +86,32 @@ function HomePage() {
           </div>
           <div className="experience-grid">
             {apiExperiences.map((exp) => (
-
-              <article key={exp.id} className="home-exp-card">
-
-                <img src={exp.image} alt="" />
-
-                <div>
-
-                  <p className="home-exp-card__location">{exp.location}</p>
-
-                  <h3 className="home-exp-card__title">{exp.name}</h3>
-
+              <Link
+                key={exp.id}
+                to={`/experiences/${exp.contentId}`}
+                className="home-exp-card"
+              >
+                <div className="home-exp-card__media">
+                  <img src={exp.image} alt={`${exp.name} 전경`} loading="lazy" />
+                  <span className="home-exp-card__badge">{shortRegion(exp.location)}</span>
                 </div>
-
-              </article>
-
+                <div className="home-exp-card__body">
+                  <h3 className="home-exp-card__title">{exp.name}</h3>
+                  <p className="home-exp-card__desc">{exp.location}</p>
+                  <span className="home-exp-card__link">
+                    체험 상세 보기
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path
+                        d="M5 12h14M13 6l6 6-6 6"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                </div>
+              </Link>
             ))}
           </div>
         </div>

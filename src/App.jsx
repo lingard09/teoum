@@ -7,6 +7,7 @@ import UpcomingTab from './pages/MyPage/UpcomingTab.jsx'
 import CoursesTab from './pages/MyPage/CoursesTab.jsx'
 import ScrapsTab from './pages/MyPage/ScrapsTab.jsx'
 import ExperiencesPage from './pages/Experiences/ExperiencesPage.jsx'
+import ExperienceDetailPage from './pages/ExperienceDetail/ExperienceDetailPage.jsx'
 import StaysPage from './pages/Stays/StaysPage.jsx'
 import BookingPage from './pages/Booking/BookingPage.jsx'
 import CoursesPage from './pages/Courses/CoursesPage.jsx'
@@ -33,6 +34,7 @@ function App() {
       </Route>
 
       <Route path="/experiences" element={<ExperiencesPage />} />
+      <Route path="/experiences/:contentId" element={<ExperienceDetailPage />} />
       <Route path="/stays" element={<StaysPage />} />
       <Route path="/stays/reserve" element={<BookingPage />} />
       <Route path="/plan" element={<CoursesPage />} />

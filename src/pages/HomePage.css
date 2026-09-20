@@ -37,35 +37,76 @@
   }
 }
 
-/* 홈 체험 섹션(TourAPI). 목업 ExperienceCard를 대체한다. */
+/* 홈 체험 카드. 마을 큐레이션 카드(TourismCard)와 같은 구성으로 맞춘다. */
 .home-exp-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
   border-radius: var(--radius-md, 8px);
   background: var(--color-surface);
   overflow: hidden;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(46, 29, 19, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.home-exp-card img {
+.home-exp-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(46, 29, 19, 0.1);
+}
+
+.home-exp-card__media {
+  position: relative;
+  height: 180px;
+}
+
+.home-exp-card__media img {
   width: 100%;
-  height: 160px;
+  height: 100%;
   object-fit: cover;
 }
 
-.home-exp-card > div {
-  padding: 0 16px 16px;
+.home-exp-card__badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-primary);
+  font-size: var(--fs-tiny, 11px);
+  letter-spacing: 0.4px;
 }
 
-.home-exp-card__location {
-  margin: 0 0 4px;
-  color: var(--color-text-muted);
-  font-size: var(--fs-tiny, 12px);
+.home-exp-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
 }
 
 .home-exp-card__title {
   margin: 0;
   color: var(--color-text-primary);
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 25px;
+}
+
+.home-exp-card__desc {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.home-exp-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
+  color: var(--color-accent, #45655b);
+  font-size: 13px;
+  font-weight: 700;
 }

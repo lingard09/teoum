@@ -166,3 +166,60 @@ export async function fetchExperienceOverview(contentId) {
     return null;
   }
 }
+
+/** homepage 필드는 <a href="...">제목</a> 형태로 와서 URL만 뽑는다. */
+function firstLink(html) {
+  const match = String(html ?? "").match(/href=["']([^"']+)["']/);
+  return match ? match[1] : null;
+}
+
+/** TourAPI 이미지가 http로 오면 https 배포본에서 혼합 콘텐츠로 차단된다. */
+function toHttps(url) {
+  return url ? url.replace(/^http:\/\//, "https://") : null;
+}
+
+/**
+ * 체험 상세페이지에 필요한 값을 한 번에 모은다.
+ * detailCommon2(기본·개요·홈페이지·좌표) + detailIntro2(프로그램·시간·휴무)
+ * + detailImage2(추가 사진).
+ *
+ * @returns {Promise<object|null>}
+ */
+export async function fetchExperiencePage(contentId) {
+  try {
+    const [commonRes, intro, imageRes] = await Promise.all([
+      callKorService("detailCommon2", { contentId }),
+      fetchExperienceDetail(contentId),
+      callKorService("detailImage2", { contentId, numOfRows: "10" }).catch(() => ({ items: [] })),
+    ]);
+
+    const common = commonRes.items[0];
+    if (!common) return null;
+
+    const gallery = imageRes.items
+      .map((item) => toHttps(item.originimgurl))
+      .filter(Boolean)
+      .slice(0, 6);
+
+    return {
+      contentId,
+      title: common.title,
+      overview: stripHtml(common.overview) || null,
+      address: [common.addr1, common.addr2].filter(Boolean).join(" ") || null,
+      image: toHttps(common.firstimage || common.firstimage2),
+      gallery,
+      homepage: firstLink(common.homepage),
+      lat: common.mapy ? Number(common.mapy) : null,
+      lng: common.mapx ? Number(common.mapx) : null,
+      programs: intro?.programs ?? [],
+      useTime: intro?.useTime ?? null,
+      restDate: intro?.restDate ?? null,
+      tel: intro?.tel ?? common.tel ?? null,
+      parking: intro?.parking ?? null,
+      isHeritage: intro?.isHeritage ?? false,
+    };
+  } catch (err) {
+    console.warn(`[experienceApi] 체험 상세페이지(${contentId}) 조회 실패`, err);
+    return null;
+  }
+}
