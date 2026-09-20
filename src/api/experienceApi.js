@@ -14,21 +14,19 @@ import { callKorService, hasTourApiKey } from "./tourApiClient.js";
 // 공공데이터포털 일일 트래픽을 감안해 노출 개수를 제한한다.
 export const API_ITEM_LIMIT = 12;
 
-// "체험" 한 단어로 검색하면 299건이 걸리지만 메타버스 체험관·유황족욕처럼
-// 이 화면의 주제(전통문화)와 무관한 시설이 대부분이다. 전통 공예/문화 쪽
-// 키워드로 좁혀서 모은다.
-const SEARCHES = [
-  { keyword: "한옥", contentTypeId: "12" },
-  { keyword: "공방", contentTypeId: "12" },
-  { keyword: "한지", contentTypeId: "12" },
-  { keyword: "도예", contentTypeId: "12" },
-  { keyword: "옹기", contentTypeId: "12" },
-  { keyword: "한복", contentTypeId: "12" },
-  { keyword: "전통문화", contentTypeId: "12" },
-  { keyword: "민속", contentTypeId: "12" },
-  { keyword: "국악", contentTypeId: "12" },
-  { keyword: "천연염색", contentTypeId: "12" },
-  { keyword: "다도", contentTypeId: "14" },
+// TourAPI에는 체험 전용 분류체계가 있다. categoryCode2로 확인한 구조:
+//   A02(인문) > A0203(체험관광지) > A02030200 전통체험  26건 (사진 있는 것 22건)
+//                                > A02030300 산사체험   2건
+//                                > A02030100 농산어촌   500건
+//                                > A02030400 이색체험   338건
+//                                > A02030600 이색거리   152건
+//
+// 전통체험 + 산사체험만 쓴다. 나머지 소분류에는 케이블카·찐빵골목처럼 전통문화와
+// 무관한 시설이 섞여 있다. 예전 키워드 검색("체험"/"한옥"/"민속")이 한옥마을과
+// 메타버스 체험관을 끌어오던 문제가 이 분류 필터로 해결된다.
+const CATEGORIES = [
+  { cat1: "A02", cat2: "A0203", cat3: "A02030200" }, // 전통체험
+  { cat1: "A02", cat2: "A0203", cat3: "A02030300" }, // 산사체험
 ];
 
 function stripHtml(text) {
@@ -81,11 +79,11 @@ export async function fetchExperiences({ limit = API_ITEM_LIMIT } = {}) {
 
   try {
     const results = await Promise.all(
-      SEARCHES.map(({ keyword, contentTypeId }) =>
-        callKorService("searchKeyword2", {
-          keyword,
-          contentTypeId,
-          numOfRows: "20",
+      CATEGORIES.map((category) =>
+        callKorService("areaBasedList2", {
+          contentTypeId: "12",
+          ...category,
+          numOfRows: "40",
           arrange: "O", // 대표이미지 있는 항목 우선
         }).catch(() => ({ items: [] })),
       ),
@@ -145,6 +143,25 @@ export async function fetchExperienceDetail(contentId, contentTypeId = "12") {
     return detail;
   } catch (err) {
     console.warn(`[experienceApi] 체험 상세(${contentId}) 조회 실패, 생략합니다.`, err);
+    return null;
+  }
+}
+
+const overviewCache = new Map();
+
+/**
+ * 소개문구. expguide가 비어 있는 곳(마을·고택처럼 프로그램이 따로 등록되지
+ * 않은 경우)에만 불러서 카드가 안내문구만 남지 않게 한다.
+ */
+export async function fetchExperienceOverview(contentId) {
+  if (overviewCache.has(contentId)) return overviewCache.get(contentId);
+
+  try {
+    const { items } = await callKorService("detailCommon2", { contentId });
+    const overview = stripHtml(items[0]?.overview) || null;
+    overviewCache.set(contentId, overview);
+    return overview;
+  } catch {
     return null;
   }
 }
