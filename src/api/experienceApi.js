@@ -1,34 +1,31 @@
 /**
- * 전통문화 체험 데이터 계층 (TourAPI 관광지 12 / 문화시설 14).
+ * 전통문화 체험 데이터 계층 (TourAPI 관광지 contentTypeId=12).
  *
- * 키워드 검색을 여러 번 돌려 합친다. 실호출로 확인한 건수는 "체험" 299건이
- * 가장 크고 공방/한지/다도/민속마을이 각각 한 자릿수~십여 건이다.
+ * 키워드 검색이 아니라 TourAPI의 분류체계를 쓴다. categoryCode2로 확인한 결과
+ * A02(인문) > A0203(체험관광지) 아래에 소분류가 나뉘어 있고, 이 화면이 원하는
+ * 것은 그중 두 가지다.
  *
- * 상세(detailIntro2)에서 체험 프로그램 안내(expguide), 이용시간, 쉬는날,
- * 문의 전화, 국가유산 지정 여부를 가져온다. 요금·소요시간·평점은 TourAPI가
+ *   A02030200 전통체험  26건 — 고택문화체험관, 전주목판서화체험관, 한복남 등
+ *   A02030300 산사체험   2건
+ *
+ * 나머지 소분류(농산어촌 체험 500건, 이색체험 338건, 이색거리 152건)에는
+ * 케이블카·찐빵골목처럼 전통문화와 무관한 시설이 섞여 있어 쓰지 않는다.
+ * 예전에 "체험"/"한옥" 같은 키워드로 검색했을 때 한옥마을이나 메타버스
+ * 체험관이 올라오던 문제가 이 분류 필터로 해결된다.
+ *
+ * 상세(detailIntro2)에서 체험 프로그램 안내(expguide), 이용시간, 휴무일,
+ * 문의처, 국가유산 지정 여부를 가져온다. 요금·소요시간·평점은 TourAPI가
  * 주지 않으므로 만들지 않는다.
  */
 import { callKorService, hasTourApiKey } from "./tourApiClient.js";
 
-// 목록이 길어질수록 카드마다 상세를 부르느라 호출 수가 늘어난다.
-// 공공데이터포털 일일 트래픽을 감안해 노출 개수를 제한한다.
+// 카드마다 상세를 부르기 때문에 목록이 길수록 호출 수가 늘어난다.
 export const API_ITEM_LIMIT = 12;
 
-// "체험" 한 단어로 검색하면 299건이 걸리지만 메타버스 체험관·유황족욕처럼
-// 이 화면의 주제(전통문화)와 무관한 시설이 대부분이다. 전통 공예/문화 쪽
-// 키워드로 좁혀서 모은다.
-const SEARCHES = [
-  { keyword: "한옥", contentTypeId: "12" },
-  { keyword: "공방", contentTypeId: "12" },
-  { keyword: "한지", contentTypeId: "12" },
-  { keyword: "도예", contentTypeId: "12" },
-  { keyword: "옹기", contentTypeId: "12" },
-  { keyword: "한복", contentTypeId: "12" },
-  { keyword: "전통문화", contentTypeId: "12" },
-  { keyword: "민속", contentTypeId: "12" },
-  { keyword: "국악", contentTypeId: "12" },
-  { keyword: "천연염색", contentTypeId: "12" },
-  { keyword: "다도", contentTypeId: "14" },
+// contentTypeId=12(관광지) 기준 분류코드.
+const CATEGORIES = [
+  { cat1: "A02", cat2: "A0203", cat3: "A02030200" }, // 전통체험
+  { cat1: "A02", cat2: "A0203", cat3: "A02030300" }, // 산사체험
 ];
 
 function stripHtml(text) {
@@ -81,29 +78,28 @@ export async function fetchExperiences({ limit = API_ITEM_LIMIT } = {}) {
 
   try {
     const results = await Promise.all(
-      SEARCHES.map(({ keyword, contentTypeId }) =>
-        callKorService("searchKeyword2", {
-          keyword,
-          contentTypeId,
-          numOfRows: "20",
+      CATEGORIES.map((category) =>
+        callKorService("areaBasedList2", {
+          contentTypeId: "12",
+          ...category,
+          numOfRows: "40",
           arrange: "O", // 대표이미지 있는 항목 우선
-        }).catch(() => ({ items: [] })),
+        }).catch(() => ({ items: [], totalCount: 0 })),
       ),
     );
 
     const byId = new Map();
     for (const { items } of results) {
       for (const item of items) {
-        // 사진이 없으면 카드가 비어 보여서 제외한다.
+        // 사진이 없으면 카드가 비어 보여서 제외한다(26건 중 22건에 사진이 있다).
         if (!item.firstimage && !item.firstimage2) continue;
         if (!byId.has(item.contentid)) byId.set(item.contentid, mapExperience(item));
       }
     }
 
     const collected = [...byId.values()];
-    // 키워드 11개 결과가 겹쳐서 API 총건수를 더하면 중복이 섞인다.
-    // 중복 제거 후 실제로 모인 후보 수를 그대로 쓴다.
-    return { source: "tourapi", experiences: collected.slice(0, limit), totalCount: collected.length };
+    const totalCount = results.reduce((sum, r) => sum + (r.totalCount ?? 0), 0);
+    return { source: "tourapi", experiences: collected.slice(0, limit), totalCount };
   } catch (err) {
     console.warn("[experienceApi] 체험 목록 조회 실패", err);
     return { source: "unavailable", experiences: [], totalCount: 0 };
@@ -148,6 +144,25 @@ export async function fetchExperienceDetail(contentId, contentTypeId = "12") {
     return detail;
   } catch (err) {
     console.warn(`[experienceApi] 체험 상세(${contentId}) 조회 실패, 생략합니다.`, err);
+    return null;
+  }
+}
+
+const overviewCache = new Map();
+
+/**
+ * 소개문구. expguide가 비어 있는 곳(마을·고택처럼 프로그램이 따로 등록되지
+ * 않은 경우)에만 불러서 카드가 안내문구만 남지 않게 한다.
+ */
+export async function fetchExperienceOverview(contentId) {
+  if (overviewCache.has(contentId)) return overviewCache.get(contentId);
+
+  try {
+    const { items } = await callKorService("detailCommon2", { contentId });
+    const overview = stripHtml(items[0]?.overview) || null;
+    overviewCache.set(contentId, overview);
+    return overview;
+  } catch {
     return null;
   }
 }

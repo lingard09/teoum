@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Icon from '../../components/Icon/Icon.jsx'
 import { icons } from '../../assets/icons/index.js'
-import { fetchExperienceDetail } from '../../api/experienceApi.js'
+import { fetchExperienceDetail, fetchExperienceOverview } from '../../api/experienceApi.js'
 import styles from './ExperienceCard.module.css'
 
 /**
@@ -13,11 +13,19 @@ import styles from './ExperienceCard.module.css'
  */
 function ApiExperienceCard({ experience }) {
   const [detail, setDetail] = useState(null)
+  const [overview, setOverview] = useState(null)
 
   useEffect(() => {
     let alive = true
     fetchExperienceDetail(experience.contentId).then((d) => {
-      if (alive) setDetail(d)
+      if (!alive) return
+      setDetail(d)
+      // 체험 프로그램이 등록돼 있지 않은 곳만 소개문구를 추가로 불러온다.
+      if (!d || d.programs.length === 0) {
+        fetchExperienceOverview(experience.contentId).then((o) => {
+          if (alive) setOverview(o)
+        })
+      }
     })
     return () => {
       alive = false
@@ -67,7 +75,7 @@ function ApiExperienceCard({ experience }) {
             </ul>
           ) : (
             <p className={styles.description}>
-              <span>한국관광공사 TourAPI에 등록된 체험 시설입니다.</span>
+              <span>{overview ?? '한국관광공사 TourAPI에 등록된 체험 시설입니다.'}</span>
             </p>
           )}
         </div>

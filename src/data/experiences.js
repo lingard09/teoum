@@ -10,8 +10,8 @@ import icheonPotteryWheel from '../assets/images/icheon-pottery-wheel.png'
 export const hero = {
   heading: ['장인의 숨결과 시간이 머무는', '전국 전통 문화체험'],
   description: [
-    '한국관광공사 TourAPI에서 한옥·공방·한지·도예 등 전통문화 키워드로',
-    '검색한 체험 시설입니다. 프로그램과 운영시간은 공공데이터 원본입니다.',
+    '한국관광공사 TourAPI의 체험관광지 분류 중 전통체험·산사체험만 골라 불러옵니다.',
+    '프로그램과 운영시간, 문의처는 모두 공공데이터 원본입니다.',
   ],
 }
 
