@@ -29,6 +29,10 @@ export const TOUR_SERVICE = {
   WITH: "https://apis.data.go.kr/B551011/KorWithService2",
   // 한국관광공사_관광사진 정보 (data.go.kr/data/15101933)
   PHOTO: "https://apis.data.go.kr/B551011/PhotoGalleryService1",
+  // 한국관광공사_관광지 집중률 방문자 추이 예측 (data.go.kr/data/15128555)
+  CONGESTION: "https://apis.data.go.kr/B551011/TatsCnctrRateService",
+  // 한국관광공사_관광지 오디오 가이드(오디) (data.go.kr/data/15101971)
+  ODII: "https://apis.data.go.kr/B551011/Odii",
 };
 
 export class TourApiError extends Error {
@@ -135,4 +139,12 @@ export function callWithService(operation, params) {
 
 export function callPhotoService(operation, params) {
   return requestTourApi(TOUR_SERVICE.PHOTO, operation, params);
+}
+
+export function callCongestionService(operation, params) {
+  return requestTourApi(TOUR_SERVICE.CONGESTION, operation, params);
+}
+
+export function callOdiiService(operation, params) {
+  return requestTourApi(TOUR_SERVICE.ODII, operation, params);
 }

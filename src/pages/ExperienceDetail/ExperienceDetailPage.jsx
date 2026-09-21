@@ -5,6 +5,8 @@ import Footer from '../../components/Footer/Footer.jsx'
 import { fetchExperiencePage } from '../../api/experienceApi.js'
 import { fetchAccessibility } from '../../api/accessApi.js'
 import { fetchGalleryPhotos } from '../../api/photoApi.js'
+import { fetchCongestionForecast, quietestDay } from '../../api/congestionApi.js'
+import { fetchAudioStories } from '../../api/audioGuideApi.js'
 import { contentTypeLabel } from '../../api/tourApiDetail.js'
 import styles from './ExperienceDetailPage.module.css'
 
@@ -15,9 +17,18 @@ function ExperienceDetailPage() {
   const [status, setStatus] = useState('loading')
   // 무장애 정보와 관광사진은 부가 정보라 본문보다 늦게 채운다.
   // 어느 장소의 결과인지 함께 담아, 장소를 옮긴 직후 이전 결과가 남는 것을 막는다.
-  const [extra, setExtra] = useState({ contentId: null, access: [], photos: [] })
-  const access = extra.contentId === contentId ? extra.access : []
-  const extraPhotos = extra.contentId === contentId ? extra.photos : []
+  const [extra, setExtra] = useState({
+    contentId: null,
+    access: [],
+    photos: [],
+    forecast: [],
+    stories: [],
+  })
+  const matches = extra.contentId === contentId
+  const access = matches ? extra.access : []
+  const extraPhotos = matches ? extra.photos : []
+  const forecast = matches ? extra.forecast : []
+  const stories = matches ? extra.stories : []
 
   useEffect(() => {
     let alive = true
@@ -34,11 +45,14 @@ function ExperienceDetailPage() {
   useEffect(() => {
     if (status !== 'ready' || !detail) return undefined
     let alive = true
-    Promise.all([fetchAccessibility(contentId), fetchGalleryPhotos(detail.title)]).then(
-      ([access, photos]) => {
-        if (alive) setExtra({ contentId, access, photos })
-      },
-    )
+    Promise.all([
+      fetchAccessibility(contentId),
+      fetchGalleryPhotos(detail.title),
+      fetchCongestionForecast({ title: detail.title, address: detail.address }),
+      fetchAudioStories({ lat: detail.lat, lng: detail.lng, title: detail.title }),
+    ]).then(([access, photos, forecast, stories]) => {
+      if (alive) setExtra({ contentId, access, photos, forecast, stories })
+    })
     return () => {
       alive = false
     }
@@ -47,6 +61,11 @@ function ExperienceDetailPage() {
   // detailImage2는 거의 모든 장소에 있고, 관광사진 API는 일부 장소에만 있는 대신 장수가 많다.
   // 둘을 합치되 같은 URL은 한 번만 그린다.
   const gallery = detail ? [...new Set([...detail.gallery, ...extraPhotos])].slice(0, 12) : []
+
+  // 예측은 오늘부터 30일치가 온다. 한 화면에 다 넣으면 읽히지 않아 2주만 그린다.
+  const forecastWeeks = forecast.slice(0, 14)
+  const quietest = quietestDay(forecast)
+  const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 
   const facts = detail
     ? [
@@ -114,6 +133,60 @@ function ExperienceDetailPage() {
                         <img key={url} src={url} alt="" loading="lazy" />
                       ))}
                     </div>
+                  </section>
+                )}
+
+                {forecastWeeks.length > 0 && (
+                  <section className={styles.block}>
+                    <h2 className={styles.blockTitle}>혼잡 예측</h2>
+                    {quietest && (
+                      <p className={styles.quietest}>
+                        앞으로 2주 중 <strong>{quietest.date.getMonth() + 1}월 {quietest.date.getDate()}일
+                        ({WEEKDAYS[quietest.date.getDay()]})</strong>이 가장 한산합니다.
+                      </p>
+                    )}
+                    <ul className={styles.forecast}>
+                      {forecastWeeks.map((day) => (
+                        <li key={day.ymd} className={styles.forecastDay}>
+                          <span className={styles.forecastDate}>
+                            {day.date.getMonth() + 1}/{day.date.getDate()}
+                            <em>{WEEKDAYS[day.date.getDay()]}</em>
+                          </span>
+                          <span className={styles.forecastBar} aria-hidden="true">
+                            <span
+                              className={styles[`bar_${day.level}`]}
+                              style={{ height: `${Math.max(day.rate, 4)}%` }}
+                            />
+                          </span>
+                          <span className={styles.forecastLabel} data-level={day.level}>
+                            {day.label}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className={styles.accessNote}>
+                      한국관광공사 집중률 예측(0~100 지수)입니다. 80 이상이 혼잡입니다.
+                    </p>
+                  </section>
+                )}
+
+                {stories.length > 0 && (
+                  <section className={styles.block}>
+                    <h2 className={styles.blockTitle}>오디오 해설</h2>
+                    <ul className={styles.stories}>
+                      {stories.map((story) => (
+                        <li key={story.id} className={styles.story}>
+                          <details>
+                            <summary>
+                              <strong>{story.title}</strong>
+                              <span>{story.audioTitle}</span>
+                            </summary>
+                            <p>{story.script}</p>
+                          </details>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className={styles.accessNote}>한국관광공사 오디오 가이드 &lsquo;오디&rsquo; 대본입니다.</p>
                   </section>
                 )}
 
