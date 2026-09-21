@@ -16,25 +16,29 @@
 
 import { withCache } from "./apiCache.js";
 
-const TOUR_API_KEY = import.meta.env.VITE_TOUR_API_KEY ?? "";
+// 서비스키는 더 이상 브라우저에 두지 않는다. /api/tour 프록시(Cloudflare Function)가
+// 키를 붙여 공공데이터포털로 보내고, 응답을 엣지에 하루 캐시한다.
+// 예전에는 VITE_ 변수가 번들에 인라인돼 키가 공개됐고, 일일 한도도 방문자 수에
+// 비례해서 7명이면 소진됐다(실측). 자세한 사정은 functions/api/tour 참고.
+const PROXY_BASE = "/api/tour";
 
 export const TOUR_SERVICE = {
   // 한국관광공사_국문 관광정보 서비스_GW (data.go.kr/data/15101578)
-  KOR: "https://apis.data.go.kr/B551011/KorService2",
+  KOR: `${PROXY_BASE}/B551011/KorService2`,
   // 한국관광공사_관광지별 연관 관광지 정보 (data.go.kr/data/15128560)
-  RELATED: "https://apis.data.go.kr/B551011/TarRlteTarService1",
+  RELATED: `${PROXY_BASE}/B551011/TarRlteTarService1`,
   // 한국관광공사_관광빅데이터 정보서비스_GW - 지역별 방문자수 (data.go.kr/data/15101972)
-  DATALAB: "https://apis.data.go.kr/B551011/DataLabService",
+  DATALAB: `${PROXY_BASE}/B551011/DataLabService`,
   // 한국관광공사_무장애 여행 정보 (data.go.kr/data/15101897)
-  WITH: "https://apis.data.go.kr/B551011/KorWithService2",
+  WITH: `${PROXY_BASE}/B551011/KorWithService2`,
   // 한국관광공사_관광사진 정보 (data.go.kr/data/15101933)
-  PHOTO: "https://apis.data.go.kr/B551011/PhotoGalleryService1",
+  PHOTO: `${PROXY_BASE}/B551011/PhotoGalleryService1`,
   // 한국관광공사_관광지 집중률 방문자 추이 예측 (data.go.kr/data/15128555)
-  CONGESTION: "https://apis.data.go.kr/B551011/TatsCnctrRateService",
+  CONGESTION: `${PROXY_BASE}/B551011/TatsCnctrRateService`,
   // 한국관광공사_관광지 오디오 가이드(오디) (data.go.kr/data/15101971)
-  ODII: "https://apis.data.go.kr/B551011/Odii",
+  ODII: `${PROXY_BASE}/B551011/Odii`,
   // 한국관광공사_영문 관광정보 서비스 (data.go.kr/data/15101753)
-  ENG: "https://apis.data.go.kr/B551011/EngService2",
+  ENG: `${PROXY_BASE}/B551011/EngService2`,
 };
 
 export class TourApiError extends Error {
@@ -46,8 +50,10 @@ export class TourApiError extends Error {
   }
 }
 
+// 키는 서버에만 있다. 클라이언트는 프록시가 응답할 것으로 보고 항상 진행한다.
+// (키 누락은 프록시가 500과 함께 사유를 돌려주므로 거기서 드러난다.)
 export function hasTourApiKey() {
-  return TOUR_API_KEY.length > 0;
+  return true;
 }
 
 /**
@@ -66,15 +72,7 @@ function normalizeItems(items) {
 // Referer 없음/Origin만/쿼리 없는 Referer는 200, "?contentId=..."가 붙으면 400).
 // 예약 페이지처럼 URL에 쿼리가 있는 화면에서 API가 통째로 실패하므로 Referer를 보내지 않는다.
 async function requestTourApi(baseUrl, operation, params = {}) {
-  if (!hasTourApiKey()) {
-    throw new TourApiError("VITE_TOUR_API_KEY가 설정되지 않았습니다.", {
-      code: "NO_API_KEY",
-      source: operation,
-    });
-  }
-
   const query = new URLSearchParams({
-    serviceKey: TOUR_API_KEY,
     MobileOS: "ETC",
     MobileApp: "TeoumWeb",
     _type: "json",

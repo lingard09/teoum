@@ -16,7 +16,7 @@ const CURATED_TOUR_API_CONTENT_IDS = new Set(["264284", "126537"]);
 /**
  * 한옥마을 데이터 API 계층.
  *
- * VITE_TOUR_API_KEY가 설정되어 있으면 한국관광공사 TourAPI(searchKeyword2)로
+ * 한국관광공사 TourAPI(searchKeyword2)로
  * 실제 주소/좌표/연락처/콘텐츠ID를 가져와 큐레이션 데이터에 덧씌운다. 카드
  * 이미지와 소개 문구는 Figma 디자인에 맞춰 큐레이션한 값을 그대로 유지한다.
  * 키가 없거나 API 호출이 실패하면 조용히 mock 데이터(villages.js에 미리

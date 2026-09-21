@@ -13,13 +13,11 @@
 
 import { withCache } from "./apiCache.js";
 
-const KEY = import.meta.env.VITE_TOUR_API_KEY ?? "";
-const BASE = "https://apis.data.go.kr/1360000";
+// 기상청도 같은 포털 키를 쓰므로 같은 프록시를 탄다(기관코드만 다르다).
+const BASE = "/api/tour/1360000";
 
 async function callWeather(service, operation, params) {
-  if (!KEY) return [];
   const query = new URLSearchParams({
-    serviceKey: KEY,
     dataType: "JSON",
     numOfRows: "1000",
     pageNo: "1",

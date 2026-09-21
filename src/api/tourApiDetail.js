@@ -1,31 +1,18 @@
 // 한국관광공사 TourAPI(국문 관광정보 서비스, KorService2) 연동 유틸.
 //
-// 서비스키는 .env의 VITE_TOUR_API_KEY 하나로 관리한다(tourApiClient.js와 공유).
-// data.go.kr에서 받은 "Decoding(일반 인증키)" 값을 넣는다 — 아래 buildUrl에서
-// URLSearchParams가 인코딩을 한 번만 수행하므로, 이미 인코딩된 "Encoding" 키를 넣으면
-// %2F -> %252F 처럼 이중 인코딩되어 인증 오류가 난다.
-//
-// .env는 .gitignore에 등록돼 있어 커밋되지 않는다 — 새 환경에서는 .env.example을 복사해
-// 키를 채워 넣을 것. 단, 이 프로젝트는 순수 정적 프런트엔드(Vite SPA)라 빌드된 JS에
-// 키 값이 그대로 포함된다. 즉 배포 후에는 누구나 네트워크 탭/번들에서 키를 볼 수 있다.
-// 완전히 감추려면 백엔드(서버리스 함수 등) 뒤로 프록시해야 하며, 이 저장소에는
-// 아직 그런 백엔드가 없다.
+// 서비스키는 브라우저에 두지 않는다. /api/tour 프록시(Cloudflare Function)가 키를 붙이고
+// 응답을 엣지에 하루 캐시한다 — 자세한 사정은 functions/api/tour 참고.
 import { withCache } from './apiCache.js'
 
-const SERVICE_KEY = import.meta.env.VITE_TOUR_API_KEY ?? ''
+// 서비스키는 /api/tour 프록시(Cloudflare Function)가 붙인다. 브라우저에 두지 않는다.
 
-// apis.data.go.kr은 Access-Control-Allow-Origin을 내려줘서(실제 호출로 확인) 배포본에서도
-// 브라우저 직접 호출이 CORS에 막히지 않는다. 개발 서버에서 프록시를 쓰는 건 CORS 우회가
-// 아니라 순수 편의(vite dev 화면과 같은 오리진으로 보여서 네트워크 탭 확인이 편함) 목적이다.
-const BASE_URL = import.meta.env.DEV
-  ? '/tourapi-proxy/B551011/KorService2'
-  : 'https://apis.data.go.kr/B551011/KorService2'
+// 같은 오리진이라 CORS 문제가 없다.
+const BASE_URL = '/api/tour/B551011/KorService2'
 
 const REQUEST_TIMEOUT_MS = 8000
 
 function buildUrl(operation, params) {
   const query = new URLSearchParams({
-    serviceKey: SERVICE_KEY,
     MobileOS: 'ETC',
     MobileApp: 'teoum',
     _type: 'json',
@@ -39,10 +26,6 @@ function buildUrl(operation, params) {
 // Referer 없음/Origin만/쿼리 없는 Referer는 200, "?contentId=..."가 붙으면 400).
 // 예약 페이지처럼 URL에 쿼리가 있는 화면에서 API가 통째로 실패하므로 Referer를 보내지 않는다.
 async function callTourApi(operation, params) {
-  if (!SERVICE_KEY) {
-    throw new Error('TourAPI 서비스키가 설정되지 않았습니다. .env의 VITE_TOUR_API_KEY를 확인하세요.')
-  }
-
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
