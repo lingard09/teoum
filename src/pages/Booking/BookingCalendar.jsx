@@ -76,6 +76,8 @@ function BookingCalendar({ selectedDate, onSelectDate, closedDates, bookingWindo
           }
           const isClosed = closedDates.includes(cell.key)
           const isSelected = cell.key === selectedDate
+          // 예약을 받지 않으므로 "잔여" 같은 좌석 상태는 쓰지 않는다.
+          // TourAPI에 그런 값이 없어서, 붙이면 지어낸 값이 된다.
           return (
             <button
               key={cell.key}
@@ -85,7 +87,7 @@ function BookingCalendar({ selectedDate, onSelectDate, closedDates, bookingWindo
               onClick={() => onSelectDate(cell.key)}
             >
               <span className={styles.dayNumber}>{cell.day}</span>
-              <span className={styles.dayStatus}>{isClosed ? '마감' : isSelected ? '선택됨' : '잔여'}</span>
+              {isSelected && <span className={styles.dayStatus}>선택됨</span>}
             </button>
           )
         })}

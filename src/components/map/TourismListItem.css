@@ -89,7 +89,11 @@
   padding: var(--space-3);
 }
 
-.list-item__action-btn {
+/* global.css의 `.hanok-app a { color: inherit }`가 선택자 순위(0,1,1)로
+   단일 클래스 규칙을 이겨서, <a>로 만든 버튼의 글자색이 배경색과 같아졌다
+   (어두운 배경에 어두운 글자 — 대비 1.01로 사실상 안 보였다).
+   그래서 아래 규칙들은 .hanok-app을 붙여 순위를 맞춘다. */
+.hanok-app .list-item__action-btn {
   flex: 1;
   padding: 8px;
   border-radius: var(--radius-sm);
@@ -100,17 +104,17 @@
   color: var(--color-text-secondary);
 }
 
-.list-item__action-btn--outline:hover {
+.hanok-app .list-item__action-btn--outline:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
 
-.list-item__action-btn--solid {
+.hanok-app .list-item__action-btn--solid {
   background: var(--color-accent);
   border-color: var(--color-accent);
   color: var(--color-text-on-dark);
 }
 
-.list-item__action-btn--solid:hover {
+.hanok-app .list-item__action-btn--solid:hover {
   background: var(--color-accent-hover);
 }
