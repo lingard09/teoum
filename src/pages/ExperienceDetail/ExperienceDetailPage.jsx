@@ -23,6 +23,7 @@ const COPY = {
     checkIn: '체크인', checkOut: '체크아웃', roomCount: '객실 수',
     roomType: '객실 종류', cooking: '취사', subFacility: '부대시설',
     backStay: '← 숙소 목록으로', backExp: '← 체험 목록으로',
+    addTrip: '내 여정에 담기',
   },
   en: {
     intro: 'About', programs: 'Programs', photos: 'Photos', forecast: 'Crowd forecast',
@@ -32,6 +33,7 @@ const COPY = {
     checkIn: 'Check-in', checkOut: 'Check-out', roomCount: 'Rooms',
     roomType: 'Room types', cooking: 'Cooking', subFacility: 'Facilities',
     backStay: '← Back to stays', backExp: '← Back to list',
+    addTrip: 'Add to my trip',
   },
 }
 
@@ -332,6 +334,16 @@ function ExperienceDetailPage() {
                       </div>
                     ))}
                   </dl>
+                )}
+
+                {/* 여정 담기는 숙소에만 있다. 체험은 예약 경로 자체를 없앴다. */}
+                {detail.isStay && (
+                  <Link
+                    to={`/stays/reserve?contentId=${contentId}`}
+                    className={styles.stayCta}
+                  >
+                    {t.addTrip}
+                  </Link>
                 )}
 
                 {detail.homepage && (
