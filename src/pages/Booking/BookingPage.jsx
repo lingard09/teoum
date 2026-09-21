@@ -31,6 +31,9 @@ import styles from './BookingPage.module.css'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 // 결제 대상은 목록(체험하기/머무르기)에서 누른 실제 항목이다. 카드가 넘겨준
+// 숙박 콘텐츠 타입. 이 페이지가 받아들이는 유일한 종류다.
+const STAY_CONTENT_TYPE_ID = '32'
+
 // contentId로 TourAPI 상세를 조회해 이름·사진·주소·소개글을 채운다.
 //
 // 주소로 직접 들어온 경우처럼 contentId가 없으면 아래 키워드로 대표 장소 하나를
@@ -78,6 +81,14 @@ function BookingPage() {
           setTourStatus('fallback')
           return
         }
+        // 이 페이지는 숙박(contentTypeId 32) 전용이다. 체험하기에서 결제 경로를
+        // 없앴는데 AI 코스의 정류장 링크로 우회해 들어오면 관광지·체험에도
+        // 숙박 요금표가 붙었다(북촌한옥마을에 "94,000원 결제" 확인).
+        // 숙박이 아니면 상세페이지로 보낸다.
+        if (String(detail.contenttypeid) !== STAY_CONTENT_TYPE_ID) {
+          navigate(`/experiences/${detail.contentid}`, { replace: true })
+          return
+        }
         // 요약 배지는 항목 종류에 따라 다른 필드를 쓴다(숙소=체크인/객실,
         // 체험=이용시간/휴무/프로그램). TourAPI에 없는 값은 넣지 않는다.
         const info = await fetchBookingInfo(detail.contentid, detail.contenttypeid)
@@ -103,7 +114,7 @@ function BookingPage() {
     return () => {
       cancelled = true
     }
-  }, [contentId])
+  }, [contentId, navigate])
 
   // 실제 결제 연동은 없다. 고른 일정·인원과 TourAPI 장소 정보를 보관함에 담고
   // 마이페이지의 "다가오는 여정"으로 보낸다.

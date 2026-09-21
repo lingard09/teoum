@@ -111,6 +111,7 @@ export async function onRequestPost({ request, env }) {
       if (!place) return null;
       return {
         contentId: place.contentId,
+        contentTypeId: place.contentTypeId ?? null,
         name: place.name,
         address: place.address ?? null,
         image: place.image ?? null,

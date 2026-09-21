@@ -4,6 +4,7 @@ import { saveAiCourse } from '../../api/mypageApi.js'
 import { fetchCongestionForecast, bestVisitDay } from '../../api/congestionApi.js'
 import { fetchWeatherByDate } from '../../api/weatherApi.js'
 import { fetchAttractionDetail } from '../../api/tourApi.js'
+import { stopLink } from '../../utils/stopLink.js'
 import styles from './CoursesPage.module.css'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
@@ -163,8 +164,8 @@ function AiPlanResult({ state, onRetry }) {
                     {stop.reason && <p className={styles.aiStopReason}>{stop.reason}</p>}
                   </div>
 
-                  <Link to={`/stays/reserve?contentId=${stop.contentId}`} className={styles.aiStopLink}>
-                    예약
+                  <Link to={stopLink(stop).to} className={styles.aiStopLink}>
+                    {stopLink(stop).label}
                   </Link>
                 </li>
               ))}

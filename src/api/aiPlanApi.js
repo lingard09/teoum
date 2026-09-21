@@ -43,6 +43,8 @@ async function collectCandidates({ region, limit = 24 }) {
       if (region && address && !address.includes(region)) continue;
       byId.set(item.contentid, {
         contentId: item.contentid,
+        // 정류장 링크를 숙박(32)과 그 외로 갈라야 해서 종류를 함께 넘긴다.
+        contentTypeId: item.contenttypeid ?? null,
         name: item.title,
         address: address || null,
         image: item.firstimage || item.firstimage2 || null,

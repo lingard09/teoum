@@ -1,4 +1,5 @@
 import { Link, useOutletContext } from 'react-router-dom'
+import { stopLink } from '../../utils/stopLink.js'
 import styles from './CoursesTab.module.css'
 
 /**
@@ -55,11 +56,8 @@ function CoursesTab() {
                   {stop.reason && <p className={styles.stopReason}>{stop.reason}</p>}
                 </div>
 
-                <Link
-                  to={`/stays/reserve?contentId=${stop.contentId}`}
-                  className={styles.stopLink}
-                >
-                  예약
+                <Link to={stopLink(stop).to} className={styles.stopLink}>
+                  {stopLink(stop).label}
                 </Link>
               </li>
             ))}
