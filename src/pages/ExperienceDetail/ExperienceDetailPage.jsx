@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom'
 import Header from '../../components/Header/Header.jsx'
 import Footer from '../../components/Footer/Footer.jsx'
 import { fetchExperiencePage } from '../../api/experienceApi.js'
+import { fetchAccessibility } from '../../api/accessApi.js'
+import { fetchGalleryPhotos } from '../../api/photoApi.js'
 import { contentTypeLabel } from '../../api/tourApiDetail.js'
 import styles from './ExperienceDetailPage.module.css'
 
@@ -11,6 +13,11 @@ function ExperienceDetailPage() {
   const { contentId } = useParams()
   const [detail, setDetail] = useState(null)
   const [status, setStatus] = useState('loading')
+  // 무장애 정보와 관광사진은 부가 정보라 본문보다 늦게 채운다.
+  // 어느 장소의 결과인지 함께 담아, 장소를 옮긴 직후 이전 결과가 남는 것을 막는다.
+  const [extra, setExtra] = useState({ contentId: null, access: [], photos: [] })
+  const access = extra.contentId === contentId ? extra.access : []
+  const extraPhotos = extra.contentId === contentId ? extra.photos : []
 
   useEffect(() => {
     let alive = true
@@ -23,6 +30,23 @@ function ExperienceDetailPage() {
       alive = false
     }
   }, [contentId])
+
+  useEffect(() => {
+    if (status !== 'ready' || !detail) return undefined
+    let alive = true
+    Promise.all([fetchAccessibility(contentId), fetchGalleryPhotos(detail.title)]).then(
+      ([access, photos]) => {
+        if (alive) setExtra({ contentId, access, photos })
+      },
+    )
+    return () => {
+      alive = false
+    }
+  }, [contentId, status, detail])
+
+  // detailImage2는 거의 모든 장소에 있고, 관광사진 API는 일부 장소에만 있는 대신 장수가 많다.
+  // 둘을 합치되 같은 URL은 한 번만 그린다.
+  const gallery = detail ? [...new Set([...detail.gallery, ...extraPhotos])].slice(0, 12) : []
 
   const facts = detail
     ? [
@@ -82,14 +106,32 @@ function ExperienceDetailPage() {
                   </section>
                 )}
 
-                {detail.gallery.length > 0 && (
+                {gallery.length > 0 && (
                   <section className={styles.block}>
                     <h2 className={styles.blockTitle}>사진</h2>
                     <div className={styles.gallery}>
-                      {detail.gallery.map((url) => (
+                      {gallery.map((url) => (
                         <img key={url} src={url} alt="" loading="lazy" />
                       ))}
                     </div>
+                  </section>
+                )}
+
+                {/* 무장애 정보가 없는 장소에서는 섹션을 아예 숨긴다. */}
+                {access.length > 0 && (
+                  <section className={styles.block}>
+                    <h2 className={styles.blockTitle}>무장애 편의</h2>
+                    <dl className={styles.access}>
+                      {access.map((row) => (
+                        <div key={row.key} className={styles.accessRow}>
+                          <dt>{row.label}</dt>
+                          <dd>{row.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    <p className={styles.accessNote}>
+                      한국관광공사 무장애 여행 정보 기준입니다.
+                    </p>
                   </section>
                 )}
               </div>

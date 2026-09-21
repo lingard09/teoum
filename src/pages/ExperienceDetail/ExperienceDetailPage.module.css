@@ -217,3 +217,44 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* 무장애 편의. 항목 수가 장소마다 3~10개로 들쭉날쭉해서
+   사이드의 .facts(좌우 배치)와 달리 라벨을 왼쪽 열에 고정한다. */
+.access {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.accessRow {
+  display: grid;
+  grid-template-columns: 116px 1fr;
+  gap: 16px;
+  align-items: baseline;
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.accessRow dt {
+  color: var(--color-ink-sub);
+  font-weight: 700;
+}
+
+.accessRow dd {
+  margin: 0;
+  color: var(--color-ink);
+}
+
+.accessNote {
+  margin: 16px 0 0;
+  color: var(--color-ink-sub);
+  font-size: 13px;
+}
+
+/* 좁은 화면에서는 116px 라벨 열이 본문을 밀어내므로 위아래로 쌓는다. */
+@media (max-width: 560px) {
+  .accessRow {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

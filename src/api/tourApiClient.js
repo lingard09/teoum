@@ -25,6 +25,10 @@ export const TOUR_SERVICE = {
   RELATED: "https://apis.data.go.kr/B551011/TarRlteTarService1",
   // 한국관광공사_관광빅데이터 정보서비스_GW - 지역별 방문자수 (data.go.kr/data/15101972)
   DATALAB: "https://apis.data.go.kr/B551011/DataLabService",
+  // 한국관광공사_무장애 여행 정보 (data.go.kr/data/15101897)
+  WITH: "https://apis.data.go.kr/B551011/KorWithService2",
+  // 한국관광공사_관광사진 정보 (data.go.kr/data/15101933)
+  PHOTO: "https://apis.data.go.kr/B551011/PhotoGalleryService1",
 };
 
 export class TourApiError extends Error {
@@ -123,4 +127,12 @@ export function callRelatedService(operation, params) {
 
 export function callDataLabService(operation, params) {
   return requestTourApi(TOUR_SERVICE.DATALAB, operation, params);
+}
+
+export function callWithService(operation, params) {
+  return requestTourApi(TOUR_SERVICE.WITH, operation, params);
+}
+
+export function callPhotoService(operation, params) {
+  return requestTourApi(TOUR_SERVICE.PHOTO, operation, params);
 }
