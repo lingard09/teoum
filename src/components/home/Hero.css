@@ -8,8 +8,12 @@
   max-width: 760px;
 }
 
-.hero__title {
+/* global.css의 `.hanok-app h1`(line-height 1.35)보다 우선하도록 .hanok-app을 붙인다.
+   붙이지 않으면 선택자 순위에 밀려 행간이 54px로 남는다. */
+.hanok-app .hero__title {
   font-size: var(--fs-display);
+  line-height: 40px;
+  letter-spacing: -0.8px;
   color: var(--color-text-primary);
 }
 
@@ -24,7 +28,9 @@
   .hero {
     padding: var(--space-7) 0 var(--space-6);
   }
-  .hero__title {
+  /* 위 규칙과 같은 순위를 맞춰야 모바일 축소가 먹는다. */
+  .hanok-app .hero__title {
     font-size: 1.75rem;
+    line-height: 36px;
   }
 }

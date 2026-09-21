@@ -47,9 +47,12 @@
   --font-heading: "Gapyeong Hanseokbong", "Noto Serif KR", serif;
   --font-body: "Noto Sans KR", sans-serif;
 
+  /* 홈(모아보기) 타이포. 피그마 실측값이다 —
+     히어로 1:834 = 40px/행간 40/자간 -0.8, 섹션 제목 1:869 = 30px/행간 36/자간 -0.75.
+     섹션 제목이 24px로 작게 들어가 있어 시안 값으로 올렸다. */
   --fs-display: 2.5rem;
   --fs-h1: 2rem;
-  --fs-h2: 1.5rem;
+  --fs-h2: 1.875rem;
   --fs-h3: 1.25rem;
   --fs-body-lg: 1.0625rem;
   --fs-body: 0.9375rem;
