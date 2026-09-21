@@ -7,6 +7,7 @@ import { fetchAccessibility } from '../../api/accessApi.js'
 import { fetchGalleryPhotos } from '../../api/photoApi.js'
 import { fetchCongestionForecast, quietestDay } from '../../api/congestionApi.js'
 import { fetchAudioStories } from '../../api/audioGuideApi.js'
+import { fetchWeatherByDate } from '../../api/weatherApi.js'
 import { contentTypeLabel } from '../../api/tourApiDetail.js'
 import styles from './ExperienceDetailPage.module.css'
 
@@ -23,12 +24,14 @@ function ExperienceDetailPage() {
     photos: [],
     forecast: [],
     stories: [],
+    weather: new Map(),
   })
   const matches = extra.contentId === contentId
   const access = matches ? extra.access : []
   const extraPhotos = matches ? extra.photos : []
   const forecast = matches ? extra.forecast : []
   const stories = matches ? extra.stories : []
+  const weather = matches ? extra.weather : new Map()
 
   useEffect(() => {
     let alive = true
@@ -50,8 +53,9 @@ function ExperienceDetailPage() {
       fetchGalleryPhotos(detail.title),
       fetchCongestionForecast({ title: detail.title, address: detail.address }),
       fetchAudioStories({ lat: detail.lat, lng: detail.lng, title: detail.title }),
-    ]).then(([access, photos, forecast, stories]) => {
-      if (alive) setExtra({ contentId, access, photos, forecast, stories })
+      fetchWeatherByDate({ lat: detail.lat, lng: detail.lng, address: detail.address }),
+    ]).then(([access, photos, forecast, stories, weather]) => {
+      if (alive) setExtra({ contentId, access, photos, forecast, stories, weather })
     })
     return () => {
       alive = false
@@ -161,11 +165,15 @@ function ExperienceDetailPage() {
                           <span className={styles.forecastLabel} data-level={day.level}>
                             {day.label}
                           </span>
+                          {/* 날씨는 열흘치만 온다. 없는 날은 자리를 비워 둔다. */}
+                          <span className={styles.forecastWeather}>
+                            {weather.get(day.ymd)?.sky ?? ''}
+                          </span>
                         </li>
                       ))}
                     </ul>
                     <p className={styles.accessNote}>
-                      한국관광공사 집중률 예측(0~100 지수)입니다. 80 이상이 혼잡입니다.
+                      한국관광공사 집중률 예측(0~100 지수, 80 이상 혼잡)과 기상청 예보입니다.
                     </p>
                   </section>
                 )}

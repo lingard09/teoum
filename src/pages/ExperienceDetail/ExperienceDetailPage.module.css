@@ -390,3 +390,14 @@
   line-height: 26px;
   white-space: pre-line;
 }
+
+/* 날씨는 예보가 있는 날에만 들어간다. 빈 날에도 높이를 유지해 막대가 어긋나지 않게 한다. */
+.forecastWeather {
+  order: 4;
+  min-height: 14px;
+  color: var(--color-ink-sub);
+  font-size: 10px;
+  line-height: 14px;
+  text-align: center;
+  word-break: keep-all;
+}
