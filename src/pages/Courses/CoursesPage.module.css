@@ -881,3 +881,48 @@
   color: #c0392b;
   font-size: 13px;
 }
+
+/* AI 코스의 추천 방문일. 집중률 데이터가 있는 장소가 있을 때만 나온다. */
+.aiTiming {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 16px 0 0;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: rgba(196, 231, 219, 0.28);
+  color: var(--color-ink);
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.aiTimingNote {
+  flex-basis: 100%;
+  color: var(--color-ink-sub);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.aiStopCongestion {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.aiStopCongestion[data-level='low'] {
+  background: rgba(127, 200, 169, 0.24);
+  color: #3f8f6d;
+}
+
+.aiStopCongestion[data-level='medium'] {
+  background: rgba(240, 192, 122, 0.26);
+  color: #a9752a;
+}
+
+.aiStopCongestion[data-level='high'] {
+  background: rgba(230, 138, 122, 0.24);
+  color: #c25441;
+}

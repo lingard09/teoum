@@ -90,3 +90,44 @@ export function quietestDay(forecast) {
   if (future.length === 0) return null;
   return future.reduce((best, day) => (day.rate < best.rate ? day : best));
 }
+
+/**
+ * 여러 장소의 예측을 합쳐 "코스 전체가 가장 한산한 날"을 고른다.
+ *
+ * 코스에는 집중률 데이터가 있는 장소와 없는 장소가 섞인다. 날짜별로 **데이터가
+ * 있는 장소들의 평균**을 쓰되, 비교 대상이 적은 날이 유리해지지 않도록
+ * 가장 많은 장소가 커버된 날 수를 기준으로 삼는다.
+ *
+ * 오늘은 "언제 갈까"의 후보가 아니므로 내일부터 본다.
+ *
+ * 기본 열흘로 끊는 것은 기상청 예보가 10일까지이기 때문이다. 집중률만 보면
+ * 더 먼 날이 한산할 수 있지만, 날씨를 같이 보여줄 수 없는 날을 추천하면
+ * "언제 갈까"의 근거가 반쪽이 된다.
+ *
+ * @param {Array<Array>} forecasts fetchCongestionForecast 결과들
+ * @param {{withinDays?: number}} [options]
+ * @returns {{ymd: string, date: Date, rate: number, level: string, label: string, labelEn: string, places: number}|null}
+ */
+export function bestVisitDay(forecasts, { withinDays = 10 } = {}) {
+  const withData = forecasts.filter((f) => f.length > 0);
+  if (withData.length === 0) return null;
+
+  const byDate = new Map();
+  for (const forecast of withData) {
+    for (const day of forecast.slice(1, withinDays + 1)) {
+      const entry = byDate.get(day.ymd) ?? { ymd: day.ymd, date: day.date, sum: 0, places: 0 };
+      entry.sum += day.rate;
+      entry.places += 1;
+      byDate.set(day.ymd, entry);
+    }
+  }
+  if (byDate.size === 0) return null;
+
+  const maxPlaces = Math.max(...[...byDate.values()].map((e) => e.places));
+  const comparable = [...byDate.values()].filter((e) => e.places === maxPlaces);
+  const best = comparable.reduce((a, b) => (b.sum < a.sum ? b : a));
+
+  const rate = best.sum / best.places;
+  const { level, label, labelEn } = congestionLevel(rate);
+  return { ymd: best.ymd, date: best.date, rate, level, label, labelEn, places: best.places };
+}
