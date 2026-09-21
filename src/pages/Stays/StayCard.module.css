@@ -260,3 +260,29 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* 숙소 카드의 두 갈래 동선 — 정보를 더 보거나(상세), 방문 계획을 담거나. */
+.cardActions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.detailButton {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: 1px solid var(--color-line, rgba(0, 0, 0, 0.14));
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 11px;
+  letter-spacing: 0.44px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.detailButton:hover {
+  background: rgba(0, 0, 0, 0.04);
+}

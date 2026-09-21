@@ -18,14 +18,20 @@ const COPY = {
   ko: {
     intro: '소개', programs: '체험 프로그램', photos: '사진', forecast: '혼잡 예측',
     audio: '오디오 해설', access: '무장애 편의', homepage: '공식 홈페이지',
-    back: '← 체험 목록으로', useTime: '이용 시간', restDate: '휴무일',
-    parking: '주차', tel: '문의', loading: '체험 정보를 불러오는 중…',
+    useTime: '이용 시간', restDate: '휴무일',
+    parking: '주차', tel: '문의', loading: '정보를 불러오는 중…',
+    checkIn: '체크인', checkOut: '체크아웃', roomCount: '객실 수',
+    roomType: '객실 종류', cooking: '취사', subFacility: '부대시설',
+    backStay: '← 숙소 목록으로', backExp: '← 체험 목록으로',
   },
   en: {
     intro: 'About', programs: 'Programs', photos: 'Photos', forecast: 'Crowd forecast',
     audio: 'Audio guide', access: 'Accessibility', homepage: 'Official website',
-    back: '← Back to list', useTime: 'Hours', restDate: 'Closed',
+    useTime: 'Hours', restDate: 'Closed',
     parking: 'Parking', tel: 'Contact', loading: 'Loading…',
+    checkIn: 'Check-in', checkOut: 'Check-out', roomCount: 'Rooms',
+    roomType: 'Room types', cooking: 'Cooking', subFacility: 'Facilities',
+    backStay: '← Back to stays', backExp: '← Back to list',
   },
 }
 
@@ -102,14 +108,27 @@ function ExperienceDetailPage() {
     ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     : ['일', '월', '화', '수', '목', '금', '토']
 
-  const facts = detail
-    ? [
-        detail.useTime && { label: t.useTime, value: detail.useTime },
-        detail.restDate && { label: t.restDate, value: detail.restDate },
-        detail.parking && { label: t.parking, value: detail.parking },
-        detail.tel && { label: t.tel, value: detail.tel },
-      ].filter(Boolean)
-    : []
+  // 숙소와 체험은 TourAPI가 주는 항목 자체가 다르다. 있는 값만 넣는다.
+  const facts = !detail
+    ? []
+    : (detail.isStay
+        ? [
+            detail.stay?.checkIn && { label: t.checkIn, value: detail.stay.checkIn },
+            detail.stay?.checkOut && { label: t.checkOut, value: detail.stay.checkOut },
+            detail.stay?.roomCount && { label: t.roomCount, value: detail.stay.roomCount },
+            detail.stay?.roomType && { label: t.roomType, value: detail.stay.roomType },
+            detail.stay?.cooking && { label: t.cooking, value: detail.stay.cooking },
+            detail.stay?.subFacility && { label: t.subFacility, value: detail.stay.subFacility },
+            detail.parking && { label: t.parking, value: detail.parking },
+            detail.tel && { label: t.tel, value: detail.tel },
+          ]
+        : [
+            detail.useTime && { label: t.useTime, value: detail.useTime },
+            detail.restDate && { label: t.restDate, value: detail.restDate },
+            detail.parking && { label: t.parking, value: detail.parking },
+            detail.tel && { label: t.tel, value: detail.tel },
+          ]
+      ).filter(Boolean)
 
   return (
     <>
@@ -326,8 +345,11 @@ function ExperienceDetailPage() {
                   </a>
                 )}
 
-                <Link to="/experiences" className={styles.backLink}>
-                  {t.back}
+                <Link
+                  to={detail.isStay ? '/stays' : '/experiences'}
+                  className={styles.backLink}
+                >
+                  {detail.isStay ? t.backStay : t.backExp}
                 </Link>
               </aside>
             </div>

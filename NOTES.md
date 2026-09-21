@@ -211,6 +211,18 @@
     무료 취소·전액 환불 보장", "맛집까지 설계"). 인증을 확인하지도, 예약·환불을
     대행하지도, 맛집을 다루지도 않는다. 실제로 하는 일로 다시 썼다.
   - 전 페이지 런타임 검사로 금액·평점·더미 문구가 하나도 없음을 확인했다.
+- **숙소 상세는 별도 페이지를 만들지 않았다.** `/experiences/:contentId` 하나가
+  숙소·체험·관광지를 모두 그린다(둘러보기 팝업도 여기로 온다).
+  - 다만 detailIntro2는 **콘텐츠 타입마다 필드 이름이 전혀 다르다.** 체험은
+    usetime/restdate/parking, 숙박은 checkintime/checkouttime/roomcount/roomtype/
+    chkcooking/subfacility/parkinglodging/infocenterlodging이다.
+    예전에는 타입을 12로 고정해 불러서 숙소 상세의 사이드가 통째로 비어 있었다.
+  - 그래서 detailCommon2로 종류를 먼저 확인한 뒤 타입에 맞는 intro를 부른다
+    (한 번 더 왕복하지만 캐시가 받는다). 숙박은 `fetchStayDetail`이 맡는다.
+  - 객실 종류·부대시설처럼 "/"가 구분자가 아니라 목록 자체인 값에는 `clampText`를
+    쓴다. `firstLine`은 "/"에서 잘라서 "보급형"만 남는다.
+  - 숙소 카드에 "상세보기"(/experiences/:id)와 "여정에 담기"(/stays/reserve) 두
+    갈래를 뒀다.
 - API 목록은 12개씩만 노출한다. 카드마다 상세를 부르기 때문에 목록이 길수록
   호출 수가 배로 늘어 공공데이터포털 일일 트래픽을 빠르게 소진한다.
 

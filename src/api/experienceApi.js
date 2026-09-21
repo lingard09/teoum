@@ -22,6 +22,9 @@ import { callKorService, hasTourApiKey } from "./tourApiClient.js";
 // 카드마다 상세를 부르기 때문에 목록이 길수록 호출 수가 늘어난다.
 export const API_ITEM_LIMIT = 12;
 
+// 숙박 콘텐츠 타입. detailIntro2의 필드 구성이 이 값에 따라 달라진다.
+export const STAY_CONTENT_TYPE_ID = "32";
+
 // contentTypeId=12(관광지) 기준 분류코드.
 const CATEGORIES = [
   { cat1: "A02", cat2: "A0203", cat3: "A02030200" }, // 전통체험
@@ -45,6 +48,17 @@ function firstLine(text, maxLength, { cutParen = false } = {}) {
   const separators = cutParen ? /(?:\s-\s|\/|,|\()/ : /(?:\s-\s|\/|,)/;
   const head = clean.split(separators)[0].trim();
   return head.length > maxLength ? `${head.slice(0, maxLength)}…` : head;
+}
+
+/**
+ * 슬래시를 살려서 길이만 줄인다.
+ * 객실 종류("보급형 / 일반형 / 누마루형…")나 부대시설처럼 슬래시가 구분자가 아니라
+ * 목록 그 자체인 값에 쓴다 — firstLine을 쓰면 첫 항목만 남아 "보급형"이 되어버린다.
+ */
+function clampText(text, maxLength) {
+  const clean = stripHtml(text).replace(/\s*\/\s*/g, " / ").trim();
+  if (!clean) return null;
+  return clean.length > maxLength ? `${clean.slice(0, maxLength)}…` : clean;
 }
 
 /**
@@ -148,6 +162,42 @@ export async function fetchExperienceDetail(contentId, contentTypeId = "12") {
   }
 }
 
+/**
+ * 숙박(contentTypeId 32) 상세. detailIntro2는 타입마다 필드 이름이 전혀 달라서
+ * 체험용 매핑(usetime/restdate/parking)으로는 한 칸도 채워지지 않는다.
+ * 실제 응답 기준으로 숙소에 있는 값만 고른다.
+ */
+export async function fetchStayDetail(contentId) {
+  const cacheKey = `stay-${contentId}`;
+  if (detailCache.has(cacheKey)) return detailCache.get(cacheKey);
+
+  try {
+    const { items } = await callKorService("detailIntro2", {
+      contentId,
+      contentTypeId: STAY_CONTENT_TYPE_ID,
+    });
+    const intro = items[0];
+    if (!intro) return null;
+
+    const detail = {
+      checkIn: stripHtml(intro.checkintime) || null,
+      checkOut: stripHtml(intro.checkouttime) || null,
+      roomCount: stripHtml(intro.roomcount) || null,
+      roomType: clampText(intro.roomtype, 60),
+      cooking: stripHtml(intro.chkcooking) || null,
+      pickup: stripHtml(intro.pickup) || null,
+      subFacility: clampText(intro.subfacility, 70),
+      parking: stripHtml(intro.parkinglodging) || null,
+      tel: firstPhone(intro.infocenterlodging),
+    };
+    detailCache.set(cacheKey, detail);
+    return detail;
+  } catch (err) {
+    console.warn(`[experienceApi] 숙소 상세(${contentId}) 조회 실패, 생략합니다.`, err);
+    return null;
+  }
+}
+
 const overviewCache = new Map();
 
 /**
@@ -187,14 +237,20 @@ function toHttps(url) {
  */
 export async function fetchExperiencePage(contentId) {
   try {
-    const [commonRes, intro, imageRes] = await Promise.all([
-      callKorService("detailCommon2", { contentId }),
-      fetchExperienceDetail(contentId),
-      callKorService("detailImage2", { contentId, numOfRows: "10" }).catch(() => ({ items: [] })),
-    ]);
-
+    // 종류를 먼저 알아야 detailIntro2를 제대로 부를 수 있다. 예전에는 셋을 한꺼번에
+    // 불러서 타입을 12로 고정했고, 그래서 숙소 상세는 체크인·객실이 통째로 비었다.
+    const commonRes = await callKorService("detailCommon2", { contentId });
     const common = commonRes.items[0];
     if (!common) return null;
+
+    const contentTypeId = String(common.contenttypeid ?? "");
+    const isStay = contentTypeId === STAY_CONTENT_TYPE_ID;
+
+    const [intro, stay, imageRes] = await Promise.all([
+      isStay ? Promise.resolve(null) : fetchExperienceDetail(contentId, contentTypeId || "12"),
+      isStay ? fetchStayDetail(contentId) : Promise.resolve(null),
+      callKorService("detailImage2", { contentId, numOfRows: "10" }).catch(() => ({ items: [] })),
+    ]);
 
     const gallery = imageRes.items
       .map((item) => toHttps(item.originimgurl))
@@ -212,12 +268,14 @@ export async function fetchExperiencePage(contentId) {
       homepage: firstLink(common.homepage),
       lat: common.mapy ? Number(common.mapy) : null,
       lng: common.mapx ? Number(common.mapx) : null,
+      isStay,
       programs: intro?.programs ?? [],
       useTime: intro?.useTime ?? null,
       restDate: intro?.restDate ?? null,
-      tel: intro?.tel ?? common.tel ?? null,
-      parking: intro?.parking ?? null,
+      tel: intro?.tel ?? stay?.tel ?? common.tel ?? null,
+      parking: intro?.parking ?? stay?.parking ?? null,
       isHeritage: intro?.isHeritage ?? false,
+      stay,
     };
   } catch (err) {
     console.warn(`[experienceApi] 체험 상세페이지(${contentId}) 조회 실패`, err);
