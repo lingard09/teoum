@@ -210,13 +210,13 @@ export async function saveReservation(reservation) {
   const id = `rv-${Date.now()}`;
   await setDoc(doc(userCollection(uid, "reservations"), id), {
     contentId: reservation.contentId ? String(reservation.contentId) : null,
-    title: reservation.title ?? "예약",
+    title: reservation.title ?? "방문 계획",
     location: reservation.location ?? null,
     image: reservation.image ?? null,
     dateLabel: reservation.dateLabel ?? null,
-    slotLabel: reservation.slotLabel ?? null,
     peopleLabel: reservation.peopleLabel ?? null,
-    totalLabel: reservation.totalLabel ?? null,
+    // 결제를 대행하지 않으므로 금액은 저장하지 않는다(예전 totalLabel 자리).
+    note: reservation.note ?? null,
     typeLabel: reservation.typeLabel ?? null,
     savedAt: formatScrapDate(new Date()),
     order: -Date.now(),

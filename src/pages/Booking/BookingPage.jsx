@@ -1,169 +1,140 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../components/Header/Header.jsx'
 import Footer from '../../components/Footer/Footer.jsx'
-import Icon from '../../components/Icon/Icon.jsx'
-import { icons } from '../../assets/icons/index.js'
 import { cx } from '../../utils/cx.js'
 import {
   contentTypeLabel,
   fetchBookingInfo,
   fetchDetailCommon,
-  fetchExperienceDetail,
   stripOverviewHtml,
   toHttpsUrl,
 } from '../../api/tourApiDetail.js'
-import {
-  steps,
-  experienceSummary,
-  step1,
-  step2,
-  step3,
-  discount,
-  materialFeeLabel,
-  paymentMethods,
-  cancellationPolicy,
-  guaranteeNote,
-} from '../../data/booking.js'
 import { saveReservation } from '../../api/mypageApi.js'
 import BookingCalendar from './BookingCalendar.jsx'
 import styles from './BookingPage.module.css'
 
+/**
+ * 숙소 방문 계획을 보관함에 담는 화면.
+ *
+ * 예전에는 결제 플로우였는데, 요금·할인·결제수단·환불규정이 전부 지어낸 값이었다.
+ * TourAPI는 예약·요금을 제공하지 않으므로 사실로 채울 수가 없다. 게다가 장소와
+ * 무관하게 고정된 데모 문구("북촌 무형문화재 명인 자개 소반 만들기")가 기본값이라,
+ * 숙소를 예약해도 그 문구가 화면과 마이페이지에까지 따라 들어갔다.
+ *
+ * 그래서 결제를 걷어내고, 실제로 사실인 것만 남겼다.
+ *   - 장소 정보: TourAPI 실데이터 (이름·사진·주소·소개·체크인/퇴실/객실/주차)
+ *   - 사용자가 고르는 값: 방문 예정일, 인원, 메모
+ * 지어낸 금액이나 정책은 화면에도 저장 데이터에도 넣지 않는다.
+ */
+
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
-// 결제 대상은 목록(체험하기/머무르기)에서 누른 실제 항목이다. 카드가 넘겨준
-// 숙박 콘텐츠 타입. 이 페이지가 받아들이는 유일한 종류다.
+
+// 이 페이지는 숙박 전용이다. 체험·관광지가 들어오면 상세로 돌려보낸다.
 const STAY_CONTENT_TYPE_ID = '32'
 
-// contentId로 TourAPI 상세를 조회해 이름·사진·주소·소개글을 채운다.
-//
-// 주소로 직접 들어온 경우처럼 contentId가 없으면 아래 키워드로 대표 장소 하나를
-// 보여준다. 요금·정원·환불규정은 TourAPI에 없는 값이라 booking.js의 시나리오
-// 데이터를 그대로 쓴다(실제 결제 연동이 아닌 데모 플로우).
-const FALLBACK_KEYWORD = '북촌한옥마을'
+const STEPS = [
+  { n: 1, label: '방문일 선택' },
+  { n: 2, label: '인원' },
+  { n: 3, label: '메모' },
+]
+
+function toDateValue(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate(),
+  ).padStart(2, '0')}`
+}
+
+/** 기본 방문일은 일주일 뒤. 고정 날짜를 박아두면 지난 날짜가 보인다. */
+function defaultVisitDate() {
+  const d = new Date()
+  d.setDate(d.getDate() + 7)
+  return toDateValue(d)
+}
 
 function formatDateLabel(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number)
-  const date = new Date(y, m - 1, d)
-  return `${m}월 ${d}일(${WEEKDAYS[date.getDay()]})`
+  return `${m}월 ${d}일(${WEEKDAYS[new Date(y, m - 1, d).getDay()]})`
 }
 
 function BookingPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const contentId = searchParams.get('contentId')
+
+  const [place, setPlace] = useState(null)
+  const [fetchStatus, setFetchStatus] = useState('loading')
+  // contentId가 아예 없으면 조회할 것도 없다. 이펙트에서 상태를 바꾸는 대신
+  // 렌더 중에 판정한다(불필요한 재렌더를 만들지 않는다).
+  const status = contentId ? fetchStatus : 'failed'
+  const [visitDate, setVisitDate] = useState(defaultVisitDate)
+  const [people, setPeople] = useState(2)
+  const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const [selectedDate, setSelectedDate] = useState(step1.defaultSelectedDate)
-  const [selectedSlotId, setSelectedSlotId] = useState(step1.defaultSlotId)
-  const [counts, setCounts] = useState(() =>
-    Object.fromEntries(step2.participants.map((p) => [p.id, p.defaultCount])),
-  )
-  const [name, setName] = useState(step3.defaultName)
-  const [phone, setPhone] = useState(step3.defaultPhone)
-  const [note, setNote] = useState('')
-  const [paymentMethodId, setPaymentMethodId] = useState(null)
-  const [policyOpen, setPolicyOpen] = useState(true)
-  const [tourInfo, setTourInfo] = useState(null)
-  const [tourStatus, setTourStatus] = useState('loading')
-
   useEffect(() => {
+    // contentId 없이 들어오면 보여줄 장소가 없다. 예전에는 대표 장소를 끼워
+    // 넣었는데, 고르지도 않은 곳이 예약 대상으로 뜨는 게 더 나빴다.
+    if (!contentId) return undefined
+
     let cancelled = false
 
-    async function loadTourInfo() {
-      setTourStatus('loading')
+    ;(async () => {
       try {
-        // contentId가 있으면 그 항목을 그대로 조회하고, 없으면 대표 장소로 대체한다.
-        const detail = contentId
-          ? await fetchDetailCommon(contentId)
-          : await fetchExperienceDetail(FALLBACK_KEYWORD)
+        const detail = await fetchDetailCommon(contentId)
         if (cancelled) return
         if (!detail?.title) {
-          setTourStatus('fallback')
+          setFetchStatus('failed')
           return
         }
-        // 이 페이지는 숙박(contentTypeId 32) 전용이다. 체험하기에서 결제 경로를
-        // 없앴는데 AI 코스의 정류장 링크로 우회해 들어오면 관광지·체험에도
-        // 숙박 요금표가 붙었다(북촌한옥마을에 "94,000원 결제" 확인).
-        // 숙박이 아니면 상세페이지로 보낸다.
         if (String(detail.contenttypeid) !== STAY_CONTENT_TYPE_ID) {
           navigate(`/experiences/${detail.contentid}`, { replace: true })
           return
         }
-        // 요약 배지는 항목 종류에 따라 다른 필드를 쓴다(숙소=체크인/객실,
-        // 체험=이용시간/휴무/프로그램). TourAPI에 없는 값은 넣지 않는다.
+
         const info = await fetchBookingInfo(detail.contentid, detail.contenttypeid)
         if (cancelled) return
 
-        setTourInfo({
+        setPlace({
           title: detail.title,
-          address: [detail.addr1, detail.addr2].filter(Boolean).join(' '),
-          image: toHttpsUrl(detail.firstimage),
-          overview: stripOverviewHtml(detail.overview),
+          address: [detail.addr1, detail.addr2].filter(Boolean).join(' ') || null,
+          image: toHttpsUrl(detail.firstimage) || null,
+          overview: stripOverviewHtml(detail.overview) || null,
           typeLabel: contentTypeLabel(detail.contenttypeid),
-          info,
+          info: info ?? [],
         })
-        setTourStatus('live')
+        setFetchStatus('ready')
       } catch (err) {
         if (cancelled) return
-        console.error('TourAPI 연동 실패, mock 데이터로 대체합니다:', err)
-        setTourStatus('fallback')
+        console.warn('[BookingPage] 숙소 정보 조회 실패', err)
+        setFetchStatus('failed')
       }
-    }
+    })()
 
-    loadTourInfo()
     return () => {
       cancelled = true
     }
   }, [contentId, navigate])
 
-  // 실제 결제 연동은 없다. 고른 일정·인원과 TourAPI 장소 정보를 보관함에 담고
-  // 마이페이지의 "다가오는 여정"으로 보낸다.
-  async function handleConfirm() {
+  async function handleSave() {
     setSaving(true)
     try {
       await saveReservation({
         contentId,
-        title: displaySummary.title[0],
-        location: displaySummary.address,
-        image: displaySummary.image,
-        typeLabel: tourInfo?.typeLabel ?? null,
-        dateLabel: formatDateLabel(selectedDate),
-        slotLabel: selectedSlot?.label ?? null,
-        peopleLabel: peopleSummary,
-        totalLabel: `${total.toLocaleString()}원`,
+        title: place.title,
+        location: place.address,
+        image: place.image,
+        typeLabel: place.typeLabel,
+        dateLabel: formatDateLabel(visitDate),
+        peopleLabel: `${people}명`,
+        note: note.trim() || null,
       })
       navigate('/mypage/upcoming')
     } catch (err) {
-      console.warn('[BookingPage] 예약 저장 실패', err)
+      console.warn('[BookingPage] 여정 저장 실패', err)
       setSaving(false)
     }
   }
-
-  function changeCount(id, delta) {
-    setCounts((prev) => ({ ...prev, [id]: Math.max(0, prev[id] + delta) }))
-  }
-
-  const displaySummary = {
-    image: tourInfo?.image || experienceSummary.image,
-    address: tourInfo?.address || experienceSummary.tags[0]?.label,
-    title: tourInfo?.title ? [tourInfo.title] : experienceSummary.title,
-    description: tourInfo?.overview ? [tourInfo.overview] : experienceSummary.description,
-  }
-
-  const subtotal = useMemo(
-    () => step2.participants.reduce((sum, p) => sum + p.price * counts[p.id], 0),
-    [counts],
-  )
-  const total = Math.max(0, subtotal - discount.amount)
-
-  const selectedSlot = step1.timeSlots.find((slot) => slot.id === selectedSlotId) ?? null
-  // "성인 2명 · 어린이 1명"처럼 사람이 읽는 인원 요약을 만든다.
-  const peopleSummary =
-    step2.participants
-      .filter((p) => counts[p.id] > 0)
-      .map((p) => `${p.label} ${counts[p.id]}명`)
-      .join(' · ') || null
-  const adultCount = counts.adult ?? 0
 
   return (
     <div className={styles.page}>
@@ -171,333 +142,184 @@ function BookingPage() {
 
       <main>
         <div className={styles.container}>
-          <nav className={styles.stepTracker} aria-label="예약 진행 단계">
-            {steps.map((step, i) => (
-              <div key={step.n} className={styles.stepItem}>
-                {i > 0 && <span className={styles.stepDivider} aria-hidden="true" />}
-                <span className={cx(styles.stepBadge, step.n <= 2 ? styles.stepBadgeActive : styles.stepBadgePending)}>
-                  {step.n}
-                </span>
-                <span className={cx(styles.stepLabel, step.n > 2 && styles.stepLabelPending)}>{step.label}</span>
-              </div>
-            ))}
-          </nav>
+          {status === 'loading' && <p className={styles.tourStatus}>숙소 정보를 불러오는 중…</p>}
 
-          <div className={styles.grid}>
-            <div className={styles.left}>
-              <section className={styles.summaryCard}>
-                <div className={styles.summaryImage}>
-                  <img src={displaySummary.image} alt="" />
-                  <span className={styles.summaryBadge}>
-                    <Icon {...experienceSummary.badge.icon} />
-                    {tourInfo?.typeLabel ?? experienceSummary.badge.label}
-                  </span>
-                </div>
-                <div className={styles.summaryBody}>
-                  <div className={styles.summaryTop}>
-                    <span className={cx(styles.tourStatus, styles[`tourStatus_${tourStatus}`])}>
-                      {tourStatus === 'loading' && '관광정보 불러오는 중…'}
-                      {tourStatus === 'live' && `TourAPI 연동 · ${displaySummary.title[0]}`}
-                      {tourStatus === 'fallback' && 'TourAPI 연동 실패 · 예시 정보 표시 중'}
-                    </span>
-                    <div className={styles.summaryTags}>
-                      <span className={cx(styles.summaryTag, styles.sand)}>{displaySummary.address}</span>
-                      {!tourInfo && (
-                        <span className={cx(styles.summaryTag, styles.mint)}>
-                          {experienceSummary.tags[1]?.label}
-                        </span>
+          {status === 'failed' && (
+            <p className={styles.tourStatus}>
+              숙소 정보를 불러오지 못했습니다. <Link to="/stays">숙소 목록으로 돌아가기</Link>
+            </p>
+          )}
+
+          {status === 'ready' && (
+            <>
+              <nav className={styles.stepTracker} aria-label="여정 담기 단계">
+                {STEPS.map((step, i) => (
+                  <div key={step.n} className={styles.stepItem}>
+                    {i > 0 && <span className={styles.stepDivider} aria-hidden="true" />}
+                    <span className={cx(styles.stepBadge, styles.stepBadgeActive)}>{step.n}</span>
+                    <span className={styles.stepLabel}>{step.label}</span>
+                  </div>
+                ))}
+              </nav>
+
+              <div className={styles.grid}>
+                <div className={styles.left}>
+                  <section className={styles.summaryCard}>
+                    {place.image && (
+                      <div className={styles.summaryImage}>
+                        <img src={place.image} alt="" />
+                        <span className={styles.summaryBadge}>{place.typeLabel}</span>
+                      </div>
+                    )}
+                    <div className={styles.summaryBody}>
+                      <div className={styles.summaryTop}>
+                        {place.address && (
+                          <div className={styles.summaryTags}>
+                            <span className={cx(styles.summaryTag, styles.sand)}>{place.address}</span>
+                          </div>
+                        )}
+                        <h1 className={styles.summaryTitle}>
+                          <span>{place.title}</span>
+                        </h1>
+                        {place.overview && (
+                          <p className={cx(styles.summaryDescription, styles.summaryDescriptionLive)}>
+                            <span>{place.overview}</span>
+                          </p>
+                        )}
+                      </div>
+                      {place.info.length > 0 && (
+                        <div className={styles.summaryInfoRow}>
+                          {place.info.map((label) => (
+                            <span key={label} className={styles.summaryInfoItem}>
+                              {label}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </div>
-                    <h1 className={styles.summaryTitle}>
-                      {displaySummary.title.map((line, i) => (
-                        <span key={i}>{line}</span>
-                      ))}
-                    </h1>
-                    <p className={cx(styles.summaryDescription, tourInfo && styles.summaryDescriptionLive)}>
-                      {displaySummary.description.map((line, i) => (
-                        <span key={i}>{line}</span>
-                      ))}
-                    </p>
-                  </div>
-                  <div className={styles.summaryInfoRow}>
-                    {tourInfo?.info?.length
-                      ? tourInfo.info.map((label) => (
-                          <span key={label} className={styles.summaryInfoItem}>
-                            {label}
-                          </span>
-                        ))
-                      : experienceSummary.info.map((item) => (
-                      <span key={item.label} className={styles.summaryInfoItem}>
-                        <Icon {...item.icon} />
-                        {item.label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </section>
+                  </section>
 
-              <section className={styles.stepCard}>
-                <div className={styles.stepCardHeader}>
-                  <div className={styles.stepCardHeading}>
-                    <span className={styles.stepNumber}>1</span>
-                    <div>
-                      <h2 className={styles.stepTitle}>{step1.title}</h2>
-                      <p className={styles.stepDescription}>{step1.description}</p>
-                    </div>
-                  </div>
-                  <span className={styles.monthChip}>
-                    {selectedDate.slice(0, 4)}년 {Number(selectedDate.slice(5, 7))}월
-                  </span>
-                </div>
-
-                <BookingCalendar
-                  selectedDate={selectedDate}
-                  onSelectDate={setSelectedDate}
-                  closedDates={step1.closedDates}
-                  bookingWindowLabel={step1.bookingWindowLabel}
-                />
-
-                <div className={styles.slotsSection}>
-                  <div className={styles.slotsHeader}>
-                    <span className={styles.slotsHeading}>{step1.timeSlotHeading(formatDateLabel(selectedDate))}</span>
-                    <span className={styles.slotsNote}>{step1.arrivalNote}</span>
-                  </div>
-                  <div className={styles.slots}>
-                    {step1.timeSlots.map((slot) => {
-                      const soldOut = slot.status === 'soldout'
-                      const selected = slot.id === selectedSlotId
-                      return (
-                        <button
-                          key={slot.id}
-                          type="button"
-                          className={cx(styles.slot, selected && styles.slotSelected, soldOut && styles.slotSoldOut)}
-                          disabled={soldOut}
-                          onClick={() => setSelectedSlotId(slot.id)}
-                        >
-                          <span className={styles.slotTime}>{slot.time}</span>
-                          <span className={styles.slotSeats}>
-                            <span className={styles.slotDot} />
-                            {selected ? `선택됨 (${slot.seatsLabel})` : slot.seatsLabel}
-                          </span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              </section>
-
-              <section className={styles.stepCard}>
-                <div className={styles.stepCardHeading}>
-                  <span className={styles.stepNumber}>2</span>
-                  <div>
-                    <h2 className={styles.stepTitle}>{step2.title}</h2>
-                    <p className={styles.stepDescription}>{step2.description}</p>
-                  </div>
-                </div>
-
-                <div className={styles.participants}>
-                  {step2.participants.map((p) => (
-                    <div key={p.id} className={styles.participantRow}>
+                  <section className={styles.stepCard}>
+                    <div className={styles.stepCardHeading}>
+                      <span className={styles.stepNumber}>1</span>
                       <div>
-                        <div className={styles.participantLabelRow}>
-                          <span className={styles.participantLabel}>{p.label}</span>
-                          {p.tag && <span className={styles.participantTag}>{p.tag}</span>}
-                        </div>
-                        <p className={styles.participantDescription}>{p.description}</p>
-                        <p className={styles.participantPrice}>
-                          <span className={styles.participantPriceValue}>{p.price.toLocaleString()}원</span>
-                          <span className={styles.participantPriceUnit}> / 1인</span>
+                        <h2 className={styles.stepTitle}>방문 예정일</h2>
+                        <p className={styles.stepDescription}>
+                          보관함에 담아둘 날짜입니다. 실제 예약은 숙소에 직접 문의해 주세요.
                         </p>
                       </div>
-                      <div className={styles.counter}>
-                        <button
-                          type="button"
-                          className={styles.counterButton}
-                          onClick={() => changeCount(p.id, -1)}
-                          aria-label={`${p.label} 인원 감소`}
-                        >
-                          <Icon {...icons.bookingCounterMinus} />
-                        </button>
-                        <span className={styles.counterValue}>{counts[p.id]}</span>
-                        <button
-                          type="button"
-                          className={styles.counterButton}
-                          onClick={() => changeCount(p.id, 1)}
-                          aria-label={`${p.label} 인원 증가`}
-                        >
-                          <Icon {...icons.bookingCounterPlus} />
-                        </button>
+                    </div>
+                    <BookingCalendar
+                      selectedDate={visitDate}
+                      onSelectDate={setVisitDate}
+                      closedDates={[]}
+                      bookingWindowLabel="방문 예정일"
+                    />
+                  </section>
+
+                  <section className={styles.stepCard}>
+                    <div className={styles.stepCardHeading}>
+                      <span className={styles.stepNumber}>2</span>
+                      <div>
+                        <h2 className={styles.stepTitle}>인원</h2>
+                        <p className={styles.stepDescription}>
+                          함께 가는 인원입니다. 요금은 숙소마다 달라 여기서 계산하지 않습니다.
+                        </p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </section>
-
-              <section className={styles.stepCard}>
-                <div className={styles.stepCardHeading}>
-                  <span className={styles.stepNumber}>3</span>
-                  <div>
-                    <h2 className={styles.stepTitle}>{step3.title}</h2>
-                    <p className={styles.stepDescription}>{step3.description}</p>
-                  </div>
-                </div>
-
-                <div className={styles.formGrid}>
-                  <label className={styles.field}>
-                    <span className={styles.fieldLabel}>
-                      예약자 성명 <span className={styles.required}>*</span>
-                    </span>
-                    <input
-                      type="text"
-                      className={styles.fieldInput}
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </label>
-                  <label className={styles.field}>
-                    <span className={styles.fieldLabel}>
-                      연락처 (휴대폰 번호) <span className={styles.required}>*</span>
-                    </span>
-                    <input
-                      type="tel"
-                      className={styles.fieldInput}
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                    />
-                  </label>
-                  <label className={cx(styles.field, styles.fieldWide)}>
-                    <span className={styles.fieldLabelRow}>
-                      <span className={styles.fieldLabel}>{step3.noteLabel}</span>
-                      <span className={styles.fieldHint}>{step3.noteHint}</span>
-                    </span>
-                    <textarea
-                      className={styles.fieldTextarea}
-                      rows={3}
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      placeholder={step3.notePlaceholder}
-                    />
-                  </label>
-                </div>
-              </section>
-            </div>
-
-            <aside className={styles.right}>
-              <div className={styles.summaryPanel}>
-                <div className={styles.panelHeader}>
-                  <h2 className={styles.panelTitle}>결제 예정 내역</h2>
-                  <Icon {...icons.bookingReceipt} />
-                </div>
-
-                <div className={styles.priceLines}>
-                  <div className={styles.priceLine}>
-                    <div>
-                      <p className={styles.priceLineLabel}>기본 참가비 (성인)</p>
-                      <p className={styles.priceLineSub}>
-                        {step2.participants[0].price.toLocaleString()}원 × {adultCount}인
-                      </p>
-                    </div>
-                    <span className={styles.priceLineValue}>{subtotal.toLocaleString()}원</span>
-                  </div>
-                  <div className={styles.priceLine}>
-                    <div className={styles.discountLabelRow}>
-                      <p className={styles.discountLabel}>{discount.label}</p>
-                      <span className={styles.discountTag}>{discount.tag}</span>
-                    </div>
-                    <span className={styles.discountValue}>-{discount.amount.toLocaleString()}원</span>
-                  </div>
-                  <div className={styles.priceLine}>
-                    <p className={styles.priceLineLabel}>{materialFeeLabel}</p>
-                    <span className={styles.freeValue}>0원 (전액 무료)</span>
-                  </div>
-                </div>
-
-                <div className={styles.totalDivider} />
-
-                <div className={styles.totalRow}>
-                  <div>
-                    <p className={styles.totalLabel}>최종 결제 금액</p>
-                    <p className={styles.totalSub}>부가세 및 안심보험료 포함</p>
-                  </div>
-                  <p className={styles.totalValue}>
-                    {total.toLocaleString()}
-                    <Icon {...icons.bookingWon} />
-                  </p>
-                </div>
-
-                <div className={styles.paymentSection}>
-                  <p className={styles.paymentHeading}>간편 결제 수단 선택</p>
-                  <div className={styles.paymentGrid}>
-                    {paymentMethods.map((method) => (
-                      <button
-                        key={method.id}
-                        type="button"
-                        className={cx(styles.paymentButton, paymentMethodId === method.id && styles.paymentButtonActive)}
-                        style={{ background: method.bg }}
-                        onClick={() => setPaymentMethodId(method.id)}
-                      >
-                        {method.logo ? (
-                          <img src={method.logo} alt="" className={styles.paymentLogo} />
-                        ) : (
-                          <Icon {...method.icon} />
-                        )}
-                        <span style={{ color: method.color }}>{method.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className={styles.ctaButton}
-                  onClick={handleConfirm}
-                  disabled={saving}
-                >
-                  <Icon {...icons.bookingLock} />
-                  {saving
-                    ? '예약을 담는 중…'
-                    : `${total.toLocaleString()}원 결제하고 예약 확정하기`}
-                </button>
-
-                <div className={styles.policy}>
-                  <button
-                    type="button"
-                    className={styles.policyToggle}
-                    onClick={() => setPolicyOpen((v) => !v)}
-                    aria-expanded={policyOpen}
-                  >
-                    <span className={styles.policyToggleLabel}>
-                      <Icon {...icons.bookingInfo} />
-                      {cancellationPolicy.title}
-                    </span>
-                    <span className={cx(styles.policyChevron, policyOpen && styles.policyChevronOpen)}>
-                      <Icon {...icons.bookingChevronToggle} />
-                    </span>
-                  </button>
-                  {policyOpen && (
-                    <div className={styles.policyBody}>
-                      {cancellationPolicy.rows.map((row) => (
-                        <div key={row.label} className={styles.policyRow}>
-                          <span className={styles.policyRowLabel}>{row.label}</span>
-                          <span className={cx(styles.policyRowValue, styles[`policy_${row.tone}`])}>{row.value}</span>
+                    <div className={styles.participants}>
+                      <div className={styles.participantRow}>
+                        <div>
+                          <p className={styles.participantLabel}>총 인원</p>
+                          <p className={styles.participantDescription}>최소 1명</p>
                         </div>
-                      ))}
-                      <p className={styles.policyFootnote}>{cancellationPolicy.footnote}</p>
+                        <div className={styles.counter}>
+                          <button
+                            type="button"
+                            className={styles.counterButton}
+                            onClick={() => setPeople((n) => Math.max(1, n - 1))}
+                            aria-label="인원 줄이기"
+                          >
+                            −
+                          </button>
+                          <span className={styles.counterValue}>{people}</span>
+                          <button
+                            type="button"
+                            className={styles.counterButton}
+                            onClick={() => setPeople((n) => Math.min(20, n + 1))}
+                            aria-label="인원 늘리기"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </section>
 
-              <div className={styles.guaranteeNote}>
-                <Icon {...icons.bookingAward} />
-                <p>
-                  {guaranteeNote.before}
-                  <strong>{guaranteeNote.emphasis}</strong>
-                  {guaranteeNote.after}
-                </p>
+                  <section className={styles.stepCard}>
+                    <div className={styles.stepCardHeading}>
+                      <span className={styles.stepNumber}>3</span>
+                      <div>
+                        <h2 className={styles.stepTitle}>메모</h2>
+                        <p className={styles.stepDescription}>
+                          기억해 둘 것이 있으면 적어두세요. 보관함에만 저장됩니다.
+                        </p>
+                      </div>
+                    </div>
+                    <div className={styles.formGrid}>
+                      <label className={cx(styles.field, styles.fieldWide)}>
+                        <span className={styles.fieldLabel}>메모 (선택)</span>
+                        <textarea
+                          className={styles.fieldTextarea}
+                          rows={3}
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                          placeholder="예: 늦은 체크인 가능한지 문의하기"
+                        />
+                      </label>
+                    </div>
+                  </section>
+                </div>
+
+                <aside className={styles.right}>
+                  <div className={styles.summaryPanel}>
+                    <div className={styles.panelHeader}>
+                      <h2 className={styles.panelTitle}>담을 내용</h2>
+                    </div>
+
+                    <div className={styles.policyBody}>
+                      <div className={styles.policyRow}>
+                        <span className={styles.policyRowLabel}>숙소</span>
+                        <span className={styles.policyRowValue}>{place.title}</span>
+                      </div>
+                      <div className={styles.policyRow}>
+                        <span className={styles.policyRowLabel}>방문 예정일</span>
+                        <span className={styles.policyRowValue}>{formatDateLabel(visitDate)}</span>
+                      </div>
+                      <div className={styles.policyRow}>
+                        <span className={styles.policyRowLabel}>인원</span>
+                        <span className={styles.policyRowValue}>{people}명</span>
+                      </div>
+                    </div>
+
+                    <p className={styles.policyFootnote}>
+                      * 이 서비스는 결제를 대행하지 않습니다. 요금과 예약 가능 여부는 숙소에 직접
+                      확인해 주세요.
+                    </p>
+
+                    <button
+                      type="button"
+                      className={styles.ctaButton}
+                      onClick={handleSave}
+                      disabled={saving}
+                    >
+                      {saving ? '담는 중…' : '내 여정에 담기'}
+                    </button>
+                  </div>
+                </aside>
               </div>
-            </aside>
-          </div>
+            </>
+          )}
         </div>
       </main>
 
