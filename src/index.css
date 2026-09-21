@@ -27,6 +27,33 @@
   --section-title-size: 22px;
   --section-title-line: 32px;
   --section-title-weight: 700;
+
+  /* 탭 본문 최상단의 페이지 제목(h1) 공통 규칙.
+     피그마 실측값이다 — 계획하기(108:6591)·체험하기(1:3120)·머무르기(1:3670)
+     세 화면 모두 Gapyeong Hanseokbong Regular 56px / 행간 72px이다.
+     자간만 시안이 엇갈려서(체험하기 -0.9, 나머지 -1.12) 다수인 -1.12로 맞춘다. */
+  --page-title-size: 56px;
+  --page-title-line: 72px;
+  --page-title-weight: 400;
+  --page-title-tracking: -1.12px;
+
+  /* 720px 이하에서 줄이는 값. 미디어쿼리 안에서 아래 토큰을 덮어쓴다. */
+  --page-title-size-sm: 34px;
+  --page-title-line-sm: 46px;
+
+  /* 본문 컨테이너. 세 탭이 같은 좌우 여백을 쓰도록 한 곳에서 정한다. */
+  --page-max-width: 1360px;
+  --page-gutter: 80px;
+  --page-gutter-sm: 24px;
+  --page-title-top: 64px;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --page-title-size: var(--page-title-size-sm);
+    --page-title-line: var(--page-title-line-sm);
+    --page-gutter: var(--page-gutter-sm);
+  }
 }
 
 *,

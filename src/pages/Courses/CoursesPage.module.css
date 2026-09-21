@@ -6,7 +6,8 @@
 /* ---------------------------------------------------------------- 히어로 */
 .hero {
   position: relative;
-  padding: 72px 80px;
+  /* 좌우 여백은 .heroInner가 맡는다(체험하기·머무르기와 같은 규칙). */
+  padding: var(--page-title-top) 0 72px;
   background: var(--color-surface);
   overflow: hidden;
 }
@@ -25,8 +26,10 @@
 
 .heroInner {
   position: relative;
-  max-width: 1360px;
+  max-width: var(--page-max-width);
   margin: 0 auto;
+  padding-left: var(--page-gutter);
+  padding-right: var(--page-gutter);
 }
 
 .heroTop {
@@ -47,10 +50,10 @@
   margin: 0;
   color: var(--color-ink);
   font-family: var(--font-display, var(--font-sans));
-  font-size: 56px;
-  font-weight: 400;
-  line-height: 72px;
-  letter-spacing: -1.12px;
+  font-size: var(--page-title-size);
+  font-weight: var(--page-title-weight);
+  line-height: var(--page-title-line);
+  letter-spacing: var(--page-title-tracking);
 }
 
 /* 시안은 각 줄을 줄바꿈 없이 흘린다. 좁은 화면에서만 줄바꿈을 허용한다. */
@@ -484,17 +487,13 @@
 }
 
 @media (max-width: 720px) {
-  .hero,
+  /* .hero의 좌우 여백은 .heroInner(--page-gutter)가 맡으므로 여기서 빼둔다.
+     넣어두면 80px에 24px이 더해져 제목이 다른 탭보다 안쪽으로 들어간다. */
   .catalog,
   .ctaSection,
   .notice {
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-
-  .headline {
-    font-size: 34px;
-    line-height: 46px;
+    padding-left: var(--page-gutter);
+    padding-right: var(--page-gutter);
   }
 
   .headline span {
