@@ -10,7 +10,7 @@ import gangneungSeongyojang from '../assets/images/gangneung-seongyojang.png'
 export const hero = {
   heading: ['마루에 앉아 하늘을 바라보는', '고택의 하루'],
   description: [
-    '한국관광공사 TourAPI에 등록된 한옥·고택 숙소를 실시간으로 불러옵니다.',
+    '한국관광공사 TourAPI에 등록된 한옥·고택 숙소를 불러옵니다.',
     '객실 구성과 체크인 시각, 문의처는 모두 공공데이터 원본입니다.',
   ],
 }

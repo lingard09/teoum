@@ -185,8 +185,8 @@ function BookingPage() {
                 <div className={styles.summaryBody}>
                   <div className={styles.summaryTop}>
                     <span className={cx(styles.tourStatus, styles[`tourStatus_${tourStatus}`])}>
-                      {tourStatus === 'loading' && '실시간 관광정보 불러오는 중…'}
-                      {tourStatus === 'live' && `TourAPI 실시간 연동 · ${displaySummary.title[0]}`}
+                      {tourStatus === 'loading' && '관광정보 불러오는 중…'}
+                      {tourStatus === 'live' && `TourAPI 연동 · ${displaySummary.title[0]}`}
                       {tourStatus === 'fallback' && 'TourAPI 연동 실패 · 예시 정보 표시 중'}
                     </span>
                     <div className={styles.summaryTags}>

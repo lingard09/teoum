@@ -27,11 +27,7 @@ function MapSearchPage() {
   }, [region, keyword]);
 
   const visibleVillages = useMemo(() => {
-    let list = villages.filter((v) => {
-      if (quickFilter === "unesco") return v.unesco;
-      if (quickFilter === "night") return v.event?.includes("야간");
-      return true;
-    });
+    let list = villages;
 
     const effectiveSort = quickFilter === "congestion" ? "congestion" : sortBy;
     if (effectiveSort === "visitors") {

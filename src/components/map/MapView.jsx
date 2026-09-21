@@ -182,7 +182,7 @@ function MapView({ villages, activeId, onSelect }) {
       </div>
 
       <div className="map-view__status-bar">
-        <span>한국관광공사 국문관광정보(TourAPI 4.0) &amp; 공공데이터 실시간 연동중</span>
+        <span>한국관광공사 국문관광정보(TourAPI 4.0) &amp; 공공데이터 연동</span>
         <span>데이터 최종 동기화: 10분 전</span>
         <span>전국 한옥 1,420개 방문지 DB 보유</span>
       </div>

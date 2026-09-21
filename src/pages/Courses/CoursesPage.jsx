@@ -113,7 +113,7 @@ function CoursesPage() {
                   <Icon {...icons.planFilter} />
                   주제별 코스 찾기
                 </span>
-                <span className={styles.filterNote}>한국관광공사 TourAPI 실시간 조회</span>
+                <span className={styles.filterNote}>한국관광공사 TourAPI 조회</span>
               </div>
 
               {query && (
