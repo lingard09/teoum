@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Icon from '../../components/Icon/Icon.jsx'
 import { icons } from '../../assets/icons/index.js'
 import { fetchExperienceDetail, fetchExperienceOverview } from '../../api/experienceApi.js'
+import { fetchCongestionSummary } from '../../api/congestionApi.js'
 import styles from './ExperienceCard.module.css'
 
 /**
@@ -15,6 +16,8 @@ import styles from './ExperienceCard.module.css'
 function ApiExperienceCard({ experience }) {
   const [detail, setDetail] = useState(null)
   const [overview, setOverview] = useState(null)
+  // 집중률은 주요 관광지만 수록해서 대부분의 체험에는 없다. 있을 때만 배지를 단다.
+  const [congestion, setCongestion] = useState(null)
 
   useEffect(() => {
     let alive = true
@@ -28,10 +31,14 @@ function ApiExperienceCard({ experience }) {
         })
       }
     })
+    fetchCongestionSummary({ title: experience.name, address: experience.location }).then((c) => {
+      if (alive) setCongestion(c)
+    })
+
     return () => {
       alive = false
     }
-  }, [experience.contentId])
+  }, [experience.contentId, experience.name, experience.location])
 
   return (
     <article className={styles.card}>
@@ -47,6 +54,11 @@ function ApiExperienceCard({ experience }) {
           <span className={styles.badge} style={{ background: '#efe7dc', color: '#311908' }}>
             TourAPI 등록 체험
           </span>
+          {congestion && (
+            <span className={styles.badge} data-congestion={congestion.level}>
+              오늘 {congestion.label}
+            </span>
+          )}
         </div>
       </div>
 

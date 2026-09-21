@@ -216,3 +216,19 @@
 .apiDetailButton:hover {
   filter: brightness(1.15);
 }
+
+/* 집중률 예측이 있는 체험에만 붙는 배지. 다른 배지와 같은 크기를 쓰고 색만 다르다. */
+.badge[data-congestion='low'] {
+  background: #d8efe4;
+  color: #2f6f54;
+}
+
+.badge[data-congestion='medium'] {
+  background: #faeacd;
+  color: #8a5f1c;
+}
+
+.badge[data-congestion='high'] {
+  background: #f8ddd7;
+  color: #9e3f2e;
+}
