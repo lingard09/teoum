@@ -1,3 +1,4 @@
+import { fetchCongestionSummary } from "./congestionApi.js";
 import { villages, featuredVillages } from "../data/villages.js";
 import { regionGroupOf, shortRegionLabelFromAddress } from "../utils/region.js";
 import { hasTourApiKey } from "./tourApiClient.js";
@@ -67,17 +68,15 @@ function truncate(text, max) {
   return text.length > max ? `${text.slice(0, max)}…` : text;
 }
 
-const CONGESTION_LABEL = { low: "낮음", medium: "보통", high: "혼잡" };
-
 /**
- * 같은 그룹 안에서의 상대적 방문자수 순위(0~1)를 혼잡도 등급/점수로 바꾼다.
- * 방문자수 자체는 한국관광공사 관광빅데이터(DataLabService) 실데이터.
+ * 혼잡도는 집중률 예측(TatsCnctrRateService)의 실제 지수만 쓴다.
+ *
+ * 예전에는 "목록 안에서의 지역 방문자수 상대 순위"를 low/medium/high로 환산해
+ * 붙였는데, 그건 장소별 혼잡도가 아니라 우리가 보여주는 목록에 따라 달라지는
+ * 값이었다(평점을 지어내지 않기로 한 것과 같은 이유로 걷어냈다).
+ *
+ * 대신 방문자수는 "방문자 많은순" 정렬에만 쓰도록 visitorScore로 분리한다.
  */
-function congestionFromVisitorRank(ratio) {
-  const level = ratio < 0.34 ? "low" : ratio < 0.67 ? "medium" : "high";
-  const score = Math.round((2.2 + ratio * 2.6) * 10) / 10;
-  return { level, label: CONGESTION_LABEL[level], score };
-}
 
 /**
  * villages.js에 큐레이션되지 않은, TourAPI 검색 결과로만 존재하는 항목을
@@ -110,30 +109,39 @@ function mapApiOnlyVillage(result, overview) {
   };
 }
 
-/** 방문자 빅데이터로 extra 목록에 혼잡도를 채운다. 실패해도 조용히 넘어간다. */
-async function attachCongestion(extraList) {
+/**
+ * 지역 방문자수를 "방문자 많은순" 정렬용 점수로만 붙인다.
+ * 화면에 숫자로 보여주지 않으므로 순위 자체면 충분하다.
+ */
+async function attachVisitorScore(list) {
   try {
     const visitorByRegion = await fetchLatestVisitorCountsByRegion();
-    const regionPrefixes = [...new Set(extraList.map((v) => v.region.split(" ")[0]))];
-    const ranked = regionPrefixes
-      .map((prefix) => ({ prefix, count: visitorByRegion.get(prefix)?.visitorCount ?? 0 }))
-      .sort((a, b) => a.count - b.count);
-
-    const ratioByPrefix = new Map(
-      ranked.map(({ prefix }, i) => [
-        prefix,
-        ranked.length > 1 ? i / (ranked.length - 1) : 0.5,
-      ])
-    );
-
-    return extraList.map((v) => {
-      const ratio = ratioByPrefix.get(v.region.split(" ")[0]);
-      return ratio == null ? v : { ...v, congestion: congestionFromVisitorRank(ratio) };
-    });
+    return list.map((v) => ({
+      ...v,
+      visitorScore: visitorByRegion.get(v.region.split(" ")[0])?.visitorCount ?? 0,
+    }));
   } catch (err) {
-    console.warn("[villageApi] 방문자 빅데이터 조회 실패, 혼잡도 없이 표시합니다.", err);
-    return extraList;
+    console.warn("[villageApi] 방문자 빅데이터 조회 실패, 정렬 점수 없이 표시합니다.", err);
+    return list;
   }
+}
+
+/**
+ * 집중률 예측으로 혼잡도를 채운다.
+ *
+ * 이 API는 시군구별 주요 관광지만 수록해서 전수가 아니다(실측: 우리가 노출하는
+ * 장소 70곳 중 11곳). 이름이 안 맞아서가 아니라 데이터 자체가 없는 것이라
+ * (송도·개평·논산은 해당 시군구 목록에 한옥 항목이 아예 없다), 없는 곳은
+ * 배지를 그리지 않는다.
+ */
+async function attachCongestion(list) {
+  const results = await Promise.all(
+    list.map(async (v) => {
+      const summary = await fetchCongestionSummary({ title: v.name, address: v.address });
+      return summary ? { ...v, congestion: summary } : v;
+    })
+  );
+  return results;
 }
 
 let extraVillagesCache = null;
@@ -162,7 +170,7 @@ async function fetchExtraApiVillages() {
       })
     );
 
-    extraVillagesCache = await attachCongestion(mapped);
+    extraVillagesCache = await attachCongestion(await attachVisitorScore(mapped));
     return extraVillagesCache;
   } catch (err) {
     console.warn("[villageApi] 추가 한옥마을 검색 실패", err);

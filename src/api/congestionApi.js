@@ -69,6 +69,19 @@ export async function fetchCongestionForecast({ title, address }) {
 }
 
 /**
+ * 목록·지도에서 쓰는 요약. 오늘 값과 앞으로 2주 중 가장 한산한 날을 함께 준다.
+ * 데이터가 없는 장소는 null이라 배지를 그리지 않는다.
+ *
+ * @returns {Promise<{rate: number, level: string, label: string, quietest: object|null}|null>}
+ */
+export async function fetchCongestionSummary(place) {
+  const forecast = await fetchCongestionForecast(place);
+  if (forecast.length === 0) return null;
+  const [today] = forecast;
+  return { ...today, quietest: quietestDay(forecast) };
+}
+
+/**
  * 예측 중 가장 한산한 날. 추천 문구("화요일이 가장 한산합니다")에 쓴다.
  * 오늘은 "언제 갈까"의 후보가 아니므로 내일부터 본다.
  */

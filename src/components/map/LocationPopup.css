@@ -154,3 +154,11 @@
   background: var(--color-surface);
   color: var(--color-text-primary);
 }
+
+/* 집중률 예측이 있는 장소에만 나타나는 한 줄. */
+.location-popup__quietest {
+  margin: 4px 0 0;
+  color: var(--color-ink-sub, #6b6b6b);
+  font-size: 12px;
+  line-height: 18px;
+}

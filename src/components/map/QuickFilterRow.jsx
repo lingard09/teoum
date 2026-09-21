@@ -40,7 +40,7 @@ function QuickFilterRow({ active, onChange }) {
       </div>
       <span className="quick-filter-row__status">
         <span className="quick-filter-row__status-dot" aria-hidden="true" />
-        실시간 혼잡도 반영중
+        집중률 예측 반영중
       </span>
     </div>
   );

@@ -35,10 +35,17 @@ function LocationPopup({ village, point, onClose }) {
       </button>
       {congestion && (
         <Badge variant={CONGESTION_BADGE_VARIANT[congestion.level]}>
-          실시간 혼잡 {congestion.label}
+          오늘 {congestion.label}
         </Badge>
       )}
       <h3 className="location-popup__title">{name}</h3>
+      {/* 예측이 있는 곳에서만 "언제 가면 한산한지"를 덧붙인다. */}
+      {congestion?.quietest && (
+        <p className="location-popup__quietest">
+          {congestion.quietest.date.getMonth() + 1}월 {congestion.quietest.date.getDate()}일이
+          가장 한산합니다
+        </p>
+      )}
       <p className="location-popup__address">{address}</p>
 
       {isApiOnly && description && <p className="location-popup__desc">{description}</p>}

@@ -35,11 +35,12 @@ function MapSearchPage() {
 
     const effectiveSort = quickFilter === "congestion" ? "congestion" : sortBy;
     if (effectiveSort === "visitors") {
-      // 혼잡도 점수는 지역 방문자수 순위에서 나온 값이라, 높을수록 방문자가 많다.
-      list = [...list].sort((a, b) => (b.congestion?.score ?? 0) - (a.congestion?.score ?? 0));
+      // 지역별 방문자수(DataLab 실데이터) 순. 혼잡도와는 별개 값이다.
+      list = [...list].sort((a, b) => (b.visitorScore ?? 0) - (a.visitorScore ?? 0));
     } else if (effectiveSort === "congestion") {
+      // 집중률 예측이 없는 장소는 뒤로 보낸다(0으로 두면 가장 한산한 척이 된다).
       list = [...list].sort(
-        (a, b) => (a.congestion?.score ?? 99) - (b.congestion?.score ?? 99)
+        (a, b) => (a.congestion?.rate ?? 999) - (b.congestion?.rate ?? 999)
       );
     } else if (effectiveSort === "name") {
       list = [...list].sort((a, b) => a.name.localeCompare(b.name, "ko"));
