@@ -16,9 +16,9 @@ import { callCongestionService } from "./tourApiClient.js";
 import { resolveRegion } from "./regionCodes.js";
 
 export const CONGESTION_LEVELS = [
-  { level: "high", label: "혼잡", min: 80 },
-  { level: "medium", label: "보통", min: 50 },
-  { level: "low", label: "여유", min: 0 },
+  { level: "high", label: "혼잡", labelEn: "Busy", min: 80 },
+  { level: "medium", label: "보통", labelEn: "Moderate", min: 50 },
+  { level: "low", label: "여유", labelEn: "Quiet", min: 0 },
 ];
 
 export function congestionLevel(rate) {
@@ -57,8 +57,8 @@ export async function fetchCongestionForecast({ title, address }) {
       .map((item) => {
         const rate = Number(item.cnctrRate);
         if (!Number.isFinite(rate)) return null;
-        const { level, label } = congestionLevel(rate);
-        return { date: parseYmd(item.baseYmd), ymd: String(item.baseYmd), rate, level, label };
+        const { level, label, labelEn } = congestionLevel(rate);
+        return { date: parseYmd(item.baseYmd), ymd: String(item.baseYmd), rate, level, label, labelEn };
       })
       .filter(Boolean)
       .sort((a, b) => a.ymd.localeCompare(b.ymd));

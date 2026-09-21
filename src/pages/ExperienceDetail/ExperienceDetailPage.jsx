@@ -8,8 +8,26 @@ import { fetchGalleryPhotos } from '../../api/photoApi.js'
 import { fetchCongestionForecast, quietestDay } from '../../api/congestionApi.js'
 import { fetchAudioStories } from '../../api/audioGuideApi.js'
 import { fetchWeatherByDate } from '../../api/weatherApi.js'
+import { fetchEnglishDetail } from '../../api/englishApi.js'
 import { contentTypeLabel } from '../../api/tourApiDetail.js'
 import styles from './ExperienceDetailPage.module.css'
+
+// 고정 문구만 번역한다. 장소 이름·소개는 영문 관광정보 서비스가 주는 실제 영문 값을 쓰고,
+// 혼잡·날씨·무장애처럼 국문 서비스에만 있는 값은 한국어 그대로 둔다(지어내지 않는다).
+const COPY = {
+  ko: {
+    intro: '소개', programs: '체험 프로그램', photos: '사진', forecast: '혼잡 예측',
+    audio: '오디오 해설', access: '무장애 편의', homepage: '공식 홈페이지',
+    back: '← 체험 목록으로', useTime: '이용 시간', restDate: '휴무일',
+    parking: '주차', tel: '문의', loading: '체험 정보를 불러오는 중…',
+  },
+  en: {
+    intro: 'About', programs: 'Programs', photos: 'Photos', forecast: 'Crowd forecast',
+    audio: 'Audio guide', access: 'Accessibility', homepage: 'Official website',
+    back: '← Back to list', useTime: 'Hours', restDate: 'Closed',
+    parking: 'Parking', tel: 'Contact', loading: 'Loading…',
+  },
+}
 
 /** 체험 상세. 모든 값이 TourAPI 실데이터이고, 없는 항목은 아예 그리지 않는다. */
 function ExperienceDetailPage() {
@@ -25,13 +43,23 @@ function ExperienceDetailPage() {
     forecast: [],
     stories: [],
     weather: new Map(),
+    english: null,
   })
+  // 언어 선택도 어느 장소의 것인지 함께 들고 있는다. 장소를 옮기면 자동으로
+  // 한국어로 돌아가므로, 영문 자료가 없는 장소에서 영어가 선택된 채로 남지 않는다.
+  const [langState, setLangState] = useState({ contentId: null, lang: 'ko' })
+  const lang = langState.contentId === contentId ? langState.lang : 'ko'
+  const setLang = (next) => setLangState({ contentId, lang: next })
   const matches = extra.contentId === contentId
   const access = matches ? extra.access : []
   const extraPhotos = matches ? extra.photos : []
   const forecast = matches ? extra.forecast : []
   const stories = matches ? extra.stories : []
   const weather = matches ? extra.weather : new Map()
+  const english = matches ? extra.english : null
+  // 영문 자료가 없으면 전환 자체를 감춘다. 빈 영어 화면을 보여주지 않는다.
+  const showEnglish = lang === 'en' && english !== null
+  const t = COPY[showEnglish ? 'en' : 'ko']
 
   useEffect(() => {
     let alive = true
@@ -54,8 +82,9 @@ function ExperienceDetailPage() {
       fetchCongestionForecast({ title: detail.title, address: detail.address }),
       fetchAudioStories({ lat: detail.lat, lng: detail.lng, title: detail.title }),
       fetchWeatherByDate({ lat: detail.lat, lng: detail.lng, address: detail.address }),
-    ]).then(([access, photos, forecast, stories, weather]) => {
-      if (alive) setExtra({ contentId, access, photos, forecast, stories, weather })
+      fetchEnglishDetail(detail.title),
+    ]).then(([access, photos, forecast, stories, weather, english]) => {
+      if (alive) setExtra({ contentId, access, photos, forecast, stories, weather, english })
     })
     return () => {
       alive = false
@@ -69,14 +98,16 @@ function ExperienceDetailPage() {
   // 예측은 오늘부터 30일치가 온다. 한 화면에 다 넣으면 읽히지 않아 2주만 그린다.
   const forecastWeeks = forecast.slice(0, 14)
   const quietest = quietestDay(forecast)
-  const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
+  const WEEKDAYS = showEnglish
+    ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    : ['일', '월', '화', '수', '목', '금', '토']
 
   const facts = detail
     ? [
-        detail.useTime && { label: '이용 시간', value: detail.useTime },
-        detail.restDate && { label: '휴무일', value: detail.restDate },
-        detail.parking && { label: '주차', value: detail.parking },
-        detail.tel && { label: '문의', value: detail.tel },
+        detail.useTime && { label: t.useTime, value: detail.useTime },
+        detail.restDate && { label: t.restDate, value: detail.restDate },
+        detail.parking && { label: t.parking, value: detail.parking },
+        detail.tel && { label: t.tel, value: detail.tel },
       ].filter(Boolean)
     : []
 
@@ -85,7 +116,7 @@ function ExperienceDetailPage() {
       <Header />
 
       <main className={styles.page}>
-        {status === 'loading' && <p className={styles.state}>체험 정보를 불러오는 중…</p>}
+        {status === 'loading' && <p className={styles.state}>{COPY.ko.loading}</p>}
 
         {status === 'failed' && (
           <p className={styles.state}>
@@ -104,23 +135,53 @@ function ExperienceDetailPage() {
                   {detail.isHeritage && <span className={styles.badgeMint}>국가유산 지정</span>}
                   <span className={styles.badge}>{contentTypeLabel(detail.contentTypeId)}</span>
                 </div>
-                <h1 className={styles.title}>{detail.title}</h1>
-                {detail.address && <p className={styles.address}>{detail.address}</p>}
+                <h1 className={styles.title}>
+                  {showEnglish ? english.title : detail.title}
+                </h1>
+                {(showEnglish ? english.address : detail.address) && (
+                  <p className={styles.address}>
+                    {showEnglish ? english.address : detail.address}
+                  </p>
+                )}
+
+                {/* 영문 자료가 있는 장소에서만 전환을 보여준다. */}
+                {english && (
+                  <div className={styles.langSwitch} role="group" aria-label="Language">
+                    <button
+                      type="button"
+                      onClick={() => setLang('ko')}
+                      aria-pressed={!showEnglish}
+                      className={!showEnglish ? styles.langOn : undefined}
+                    >
+                      한국어
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLang('en')}
+                      aria-pressed={showEnglish}
+                      className={showEnglish ? styles.langOn : undefined}
+                    >
+                      English
+                    </button>
+                  </div>
+                )}
               </div>
             </header>
 
             <div className={styles.container}>
               <div className={styles.main}>
-                {detail.overview && (
+                {(showEnglish ? english.overview : detail.overview) && (
                   <section className={styles.block}>
-                    <h2 className={styles.blockTitle}>소개</h2>
-                    <p className={styles.overview}>{detail.overview}</p>
+                    <h2 className={styles.blockTitle}>{t.intro}</h2>
+                    <p className={styles.overview}>
+                      {showEnglish ? english.overview : detail.overview}
+                    </p>
                   </section>
                 )}
 
                 {detail.programs.length > 0 && (
                   <section className={styles.block}>
-                    <h2 className={styles.blockTitle}>체험 프로그램</h2>
+                    <h2 className={styles.blockTitle}>{t.programs}</h2>
                     <ul className={styles.programs}>
                       {detail.programs.map((program) => (
                         <li key={program}>{program}</li>
@@ -131,7 +192,7 @@ function ExperienceDetailPage() {
 
                 {gallery.length > 0 && (
                   <section className={styles.block}>
-                    <h2 className={styles.blockTitle}>사진</h2>
+                    <h2 className={styles.blockTitle}>{t.photos}</h2>
                     <div className={styles.gallery}>
                       {gallery.map((url) => (
                         <img key={url} src={url} alt="" loading="lazy" />
@@ -142,11 +203,28 @@ function ExperienceDetailPage() {
 
                 {forecastWeeks.length > 0 && (
                   <section className={styles.block}>
-                    <h2 className={styles.blockTitle}>혼잡 예측</h2>
+                    <h2 className={styles.blockTitle}>{t.forecast}</h2>
                     {quietest && (
                       <p className={styles.quietest}>
-                        앞으로 2주 중 <strong>{quietest.date.getMonth() + 1}월 {quietest.date.getDate()}일
-                        ({WEEKDAYS[quietest.date.getDay()]})</strong>이 가장 한산합니다.
+                        {showEnglish ? (
+                          <>
+                            The quietest day in the next two weeks is{' '}
+                            <strong>
+                              {quietest.date.getMonth() + 1}/{quietest.date.getDate()} (
+                              {WEEKDAYS[quietest.date.getDay()]})
+                            </strong>
+                            .
+                          </>
+                        ) : (
+                          <>
+                            앞으로 2주 중{' '}
+                            <strong>
+                              {quietest.date.getMonth() + 1}월 {quietest.date.getDate()}일 (
+                              {WEEKDAYS[quietest.date.getDay()]})
+                            </strong>
+                            이 가장 한산합니다.
+                          </>
+                        )}
                       </p>
                     )}
                     <ul className={styles.forecast}>
@@ -163,7 +241,7 @@ function ExperienceDetailPage() {
                             />
                           </span>
                           <span className={styles.forecastLabel} data-level={day.level}>
-                            {day.label}
+                            {showEnglish ? day.labelEn : day.label}
                           </span>
                           {/* 날씨는 열흘치만 온다. 없는 날은 자리를 비워 둔다. */}
                           <span className={styles.forecastWeather}>
@@ -173,14 +251,16 @@ function ExperienceDetailPage() {
                       ))}
                     </ul>
                     <p className={styles.accessNote}>
-                      한국관광공사 집중률 예측(0~100 지수, 80 이상 혼잡)과 기상청 예보입니다.
+                      {showEnglish
+                        ? 'Korea Tourism Organization crowd index (0–100; 80+ is busy) with KMA weather. Weather terms are in Korean.'
+                        : '한국관광공사 집중률 예측(0~100 지수, 80 이상 혼잡)과 기상청 예보입니다.'}
                     </p>
                   </section>
                 )}
 
                 {stories.length > 0 && (
                   <section className={styles.block}>
-                    <h2 className={styles.blockTitle}>오디오 해설</h2>
+                    <h2 className={styles.blockTitle}>{t.audio}</h2>
                     <ul className={styles.stories}>
                       {stories.map((story) => (
                         <li key={story.id} className={styles.story}>
@@ -194,14 +274,18 @@ function ExperienceDetailPage() {
                         </li>
                       ))}
                     </ul>
-                    <p className={styles.accessNote}>한국관광공사 오디오 가이드 &lsquo;오디&rsquo; 대본입니다.</p>
+                    <p className={styles.accessNote}>
+                      {showEnglish
+                        ? 'Transcripts from the Korea Tourism Organization audio guide. Korean only.'
+                        : '한국관광공사 오디오 가이드 ‘오디’ 대본입니다.'}
+                    </p>
                   </section>
                 )}
 
                 {/* 무장애 정보가 없는 장소에서는 섹션을 아예 숨긴다. */}
                 {access.length > 0 && (
                   <section className={styles.block}>
-                    <h2 className={styles.blockTitle}>무장애 편의</h2>
+                    <h2 className={styles.blockTitle}>{t.access}</h2>
                     <dl className={styles.access}>
                       {access.map((row) => (
                         <div key={row.key} className={styles.accessRow}>
@@ -211,7 +295,9 @@ function ExperienceDetailPage() {
                       ))}
                     </dl>
                     <p className={styles.accessNote}>
-                      한국관광공사 무장애 여행 정보 기준입니다.
+                      {showEnglish
+                        ? 'Based on Korea Tourism Organization accessible-travel data. Korean only.'
+                        : '한국관광공사 무장애 여행 정보 기준입니다.'}
                     </p>
                   </section>
                 )}
@@ -232,16 +318,16 @@ function ExperienceDetailPage() {
                 {detail.homepage && (
                   <a
                     className={styles.homepage}
-                    href={detail.homepage}
+                    href={(showEnglish && english.homepage) || detail.homepage}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    공식 홈페이지
+                    {t.homepage}
                   </a>
                 )}
 
                 <Link to="/experiences" className={styles.backLink}>
-                  ← 체험 목록으로
+                  {t.back}
                 </Link>
               </aside>
             </div>

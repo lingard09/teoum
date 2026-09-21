@@ -33,6 +33,8 @@ export const TOUR_SERVICE = {
   CONGESTION: "https://apis.data.go.kr/B551011/TatsCnctrRateService",
   // 한국관광공사_관광지 오디오 가이드(오디) (data.go.kr/data/15101971)
   ODII: "https://apis.data.go.kr/B551011/Odii",
+  // 한국관광공사_영문 관광정보 서비스 (data.go.kr/data/15101753)
+  ENG: "https://apis.data.go.kr/B551011/EngService2",
 };
 
 export class TourApiError extends Error {
@@ -147,4 +149,8 @@ export function callCongestionService(operation, params) {
 
 export function callOdiiService(operation, params) {
   return requestTourApi(TOUR_SERVICE.ODII, operation, params);
+}
+
+export function callEngService(operation, params) {
+  return requestTourApi(TOUR_SERVICE.ENG, operation, params);
 }
