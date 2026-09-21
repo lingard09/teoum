@@ -14,6 +14,8 @@
  *   반사해주므로 브라우저에서 직접 호출이 가능하다(별도 프록시 서버 불필요).
  */
 
+import { withCache } from "./apiCache.js";
+
 const TOUR_API_KEY = import.meta.env.VITE_TOUR_API_KEY ?? "";
 
 export const TOUR_SERVICE = {
@@ -72,16 +74,19 @@ async function requestTourApi(baseUrl, operation, params = {}) {
   });
 
   const url = `${baseUrl}/${operation}?${query.toString()}`;
-  const res = await fetch(url, { referrerPolicy: "no-referrer" });
 
-  if (!res.ok) {
-    throw new TourApiError(`TourAPI 요청 실패 (HTTP ${res.status})`, {
-      code: String(res.status),
-      source: operation,
-    });
-  }
-
-  const data = await res.json();
+  // 하루 동안 응답을 캐시한다. 일일 요청 한도를 넘기지 않기 위함이고,
+  // 이미 한도를 넘겼다면 만료된 캐시라도 돌려준다(apiCache 참고).
+  const data = await withCache(url, async () => {
+    const res = await fetch(url, { referrerPolicy: "no-referrer" });
+    if (!res.ok) {
+      throw new TourApiError(`TourAPI 요청 실패 (HTTP ${res.status})`, {
+        code: String(res.status),
+        source: operation,
+      });
+    }
+    return res.json();
+  });
 
   // 게이트웨이 레벨 에러 (인증키 미등록, 트래픽 초과, 존재하지 않는 오퍼레이션 등)
   const gatewayError = data?.OpenAPI_ServiceResponse?.cmmMsgHeader;

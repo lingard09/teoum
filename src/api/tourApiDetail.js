@@ -10,6 +10,8 @@
 // 키 값이 그대로 포함된다. 즉 배포 후에는 누구나 네트워크 탭/번들에서 키를 볼 수 있다.
 // 완전히 감추려면 백엔드(서버리스 함수 등) 뒤로 프록시해야 하며, 이 저장소에는
 // 아직 그런 백엔드가 없다.
+import { withCache } from './apiCache.js'
+
 const SERVICE_KEY = import.meta.env.VITE_TOUR_API_KEY ?? ''
 
 // apis.data.go.kr은 Access-Control-Allow-Origin을 내려줘서(실제 호출로 확인) 배포본에서도
@@ -44,21 +46,22 @@ async function callTourApi(operation, params) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
-  let res
+  const url = buildUrl(operation, params)
+
+  // tourApiClient와 같은 이유로 하루치 캐시를 태운다(일일 요청 한도 대응).
+  let data
   try {
-    res = await fetch(buildUrl(operation, params), {
-      signal: controller.signal,
-      referrerPolicy: 'no-referrer',
+    data = await withCache(url, async () => {
+      const res = await fetch(url, {
+        signal: controller.signal,
+        referrerPolicy: 'no-referrer',
+      })
+      if (!res.ok) throw new Error(`TourAPI 요청 실패 (HTTP ${res.status})`)
+      return res.json()
     })
   } finally {
     clearTimeout(timeout)
   }
-
-  if (!res.ok) {
-    throw new Error(`TourAPI 요청 실패 (HTTP ${res.status})`)
-  }
-
-  const data = await res.json()
   // 정상 응답은 { response: { header: {...} } } 형태지만, 파라미터 오류 등은
   // { resultCode, resultMsg }를 최상위에 바로 내려주는 경우가 있어 둘 다 확인한다.
   const header = data?.response?.header ?? data
