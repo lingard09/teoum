@@ -47,12 +47,17 @@ ${list}
 조건에 가장 잘 맞는 장소를 3~${MAX_STOPS}곳 고르고 방문 순서를 정해라.
 각 장소마다 왜 이 조건에 맞는지 한 문장으로 설명하고, 권장 방문 시각을 붙여라.
 
+설명을 쓸 때 반드시 지킬 것:
+- reason은 그 id의 장소만 설명한다. 다른 후보의 이름이나 지역을 섞어 쓰지 마라.
+- name에는 후보 목록에 적힌 이름을 그대로 옮겨 적어라(어느 장소를 설명하는지 대조용이다).
+- 확실하지 않으면 그 장소의 개요에 있는 내용만 가지고 써라.
+
 다음 JSON 형식으로만 답하라(설명 문장 없이 JSON만):
 {
   "title": "코스 제목 (15자 내외)",
   "summary": "이 코스를 한 문장으로 소개",
   "stops": [
-    { "contentId": "후보의 id", "time": "10:00", "reason": "이 조건에 맞는 이유 한 문장" }
+    { "contentId": "후보의 id", "name": "후보의 이름 그대로", "time": "10:00", "reason": "이 조건에 맞는 이유 한 문장" }
   ]
 }`;
 }
@@ -105,6 +110,29 @@ export async function onRequestPost({ request, env }) {
 
   // 지어낸 장소 차단: 후보에 없는 contentId는 버린다.
   const byId = new Map(candidates.map((c) => [String(c.contentId), c]));
+
+  // 설명이 다른 장소를 가리키는 경우를 걸러낸다.
+  // id는 맞는데 reason에 엉뚱한 후보 이름이 섞여 나오는 일이 실제로 있었다
+  // (서울 광흥당에 "칠곡 매원마을에서…"). 장소는 실재하지만 설명이 틀리면
+  // 화면에 그대로 두는 것보다 빼는 쪽이 낫다.
+  const otherNames = (keepId) =>
+    candidates
+      .filter((c) => String(c.contentId) !== String(keepId))
+      .map((c) => String(c.name ?? "").trim())
+      .filter((n) => n.length >= 3);
+
+  function cleanReason(reason, place, aiName) {
+    if (typeof reason !== "string" || !reason.trim()) return null;
+    const text = reason.trim();
+    const own = String(place.name ?? "");
+    // AI가 적어 보낸 이름이 후보 이름과 다르면 다른 장소를 설명한 것이다.
+    if (typeof aiName === "string" && aiName.trim() && own && !aiName.includes(own) && !own.includes(aiName.trim())) {
+      return null;
+    }
+    // 설명 안에 다른 후보의 이름이 들어 있으면 버린다(자기 이름은 허용).
+    if (otherNames(place.contentId).some((n) => text.includes(n) && !own.includes(n))) return null;
+    return text;
+  }
   const stops = (aiResult.stops ?? [])
     .map((stop) => {
       const place = byId.get(String(stop.contentId));
@@ -116,7 +144,7 @@ export async function onRequestPost({ request, env }) {
         address: place.address ?? null,
         image: place.image ?? null,
         time: typeof stop.time === "string" ? stop.time : null,
-        reason: typeof stop.reason === "string" ? stop.reason : null,
+        reason: cleanReason(stop.reason, place, stop.name),
       };
     })
     .filter(Boolean)
